@@ -9,6 +9,7 @@ class GetQcYear extends Controller
 {
     //ดึงจำนวนงาน QC ในปีนั้นๆแต่ละเดือน
     public function getQcYear($year){
+
         $results = DB::connection('mysql_main_qc')->table('qc_log_data')
             ->select(
                 DB::raw("DATE_FORMAT(datekey, '%Y-%m') AS year"),
