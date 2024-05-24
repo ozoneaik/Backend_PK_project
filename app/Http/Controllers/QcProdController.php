@@ -17,6 +17,7 @@ class QcProdController extends Controller
 
     public function store(QcProductRequest $request){
 
+
         $difficultyLevels = [
             'Very Easy' => 1,
             'Easy' => 2,

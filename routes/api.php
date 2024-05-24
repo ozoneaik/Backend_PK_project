@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\AuthController;
 
+use App\Http\Controllers\IncHdController;
 use App\Http\Controllers\QcProdController;
+use App\Http\Controllers\QcWorkdayController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,7 +24,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     //Incentive
-
+    Route::group(['prefix' => 'incentive'], function () {
+       Route::get('/index',[IncHdController::class,'index']);
+    });
 
     //Products
     Route::group(['prefix' => 'product'], function () {
@@ -30,13 +34,21 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/store', [QcProdController::class, 'store']);
         Route::get('edit/{id}', [QcProdController::class, 'edit']);
         Route::post('/update/{id}', [QcProdController::class, 'update']);
+    });
 
+    Route::group(['prefix' => 'workday'], function () {
+        Route::get('/index', [QcWorkdayController::class, 'index']);
+        Route::post('/store', [QcWorkdayController::class, 'store']);
     });
 
 });
 
-Route::post('/signup', [AuthController::class, 'signup']);
+Route::post('/signup', [AuthController::class, 'signup'])->name('signup');
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/qc_year/{year}', [\App\Http\Controllers\GetQcYear::class, 'getQcYear']);
+
+
+
+
 

@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class qc_workday extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'wo_year',
+        'wo_month',
+        'workday'
+    ];
 }

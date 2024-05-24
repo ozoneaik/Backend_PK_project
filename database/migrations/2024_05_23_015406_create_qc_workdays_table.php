@@ -15,7 +15,6 @@ return new class extends Migration
     {
         Schema::create('qc_workdays', function (Blueprint $table) {
             $table->id();
-            $table->integer('wo_id');
             $table->integer('wo_year');
             $table->integer('wo_month');
             $table->integer('workday');
