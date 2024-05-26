@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class qc_rate extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'ra_id','le_id','grade','rate'
+    ];
 }

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->integer('ti_id');
             $table->time('time');
-            $table->char('grade',50);
+            $table->string('grade');
             $table->timestamps();
 
         });

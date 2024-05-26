@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class qc_time extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'ti_id',
+        'time',
+        'grade'
+    ];
 }

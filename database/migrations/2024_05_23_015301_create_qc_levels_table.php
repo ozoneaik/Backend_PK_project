@@ -17,8 +17,8 @@ return new class extends Migration
             $table->id();
             $table->timestamps();
             $table->integer('le_id');
-            $table->string('le_code',50);
-            $table->string('le_name',10);
+            $table->string('le_code');
+            $table->string('le_name');
         });
     }
 
