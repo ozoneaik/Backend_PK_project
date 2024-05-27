@@ -61,7 +61,7 @@ class IncHdController extends Controller
                 case 'A+':
                     $user->rateVeryEasy = '0.125';
                     $user->rateEasy = '0.1875';
-                    $user->rateMiddling = '0.25';
+                    $user->rateMiddling = '0.250';
                     $user->rateHard = '0.3125';
                     $user->rateVeryHard = '0.375';
                     break;
@@ -96,12 +96,12 @@ class IncHdController extends Controller
             }
 
             // หาผลรวมยอดรับบุคคลของแต่ละคน
-            $user->total_person_received = (
+            $user->total_person_received = round(
                 ($user->level_easy * $user->rateEasy) +
                 ($user->level_very_easy * $user->rateVeryEasy) +
                 ($user->level_middling * $user->rateMiddling) +
                 ($user->level_hard * $user->rateHard) +
-                ($user->level_very_hard * $user->rateVeryHard)
+                ($user->level_very_hard * $user->rateVeryHard), 2
             );
 
 

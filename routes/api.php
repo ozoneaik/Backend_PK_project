@@ -39,6 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::group(['prefix' => 'workday'], function () {
         Route::get('/index', [QcWorkdayController::class, 'index']);
         Route::post('/store', [QcWorkdayController::class, 'store']);
+        Route::get('get-years', [QcWorkdayController::class, 'getYears']);
     });
 
 });
@@ -47,6 +48,10 @@ Route::post('/signup', [AuthController::class, 'signup'])->name('signup');
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/qc_year/{year}', [\App\Http\Controllers\GetQcYear::class, 'getQcYear']);
+
+
+Route::get('get-years', [QcWorkdayController::class, 'getYears']);
+
 
 
 

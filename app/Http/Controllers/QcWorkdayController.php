@@ -21,6 +21,13 @@ class QcWorkdayController extends Controller
         }
     }
 
+    public function getYears(){
+        $workdays = qc_workday::select('wo_year')->distinct()->get();
+        return response()->json(
+            $workdays
+        );
+    }
+
 
     public function store(Request $request)
     {
