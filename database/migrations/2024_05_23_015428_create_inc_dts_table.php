@@ -16,21 +16,19 @@ return new class extends Migration
         Schema::create('inc_dts', function (Blueprint $table) {
             $table->id();
             $table->integer('inc_id');
-            $table->char('empqccode',50);
+            $table->string('empqccode');
             $table->integer('qcqty');
-            $table->time('timepermonth');
-            $table->time('timeperday');
-            $table->char('grade',2);
+            $table->string('timepermonth');
+            $table->string('timeperday');
+            $table->string('grade');
             $table->integer('le_id');
-            $table->char('le_name',10);
+            $table->string('le_name');
             $table->double('rate');
             $table->double('payamnt');
-            $table->char('paystatus',10);
-            $table->char('payremark',50);
-            $table->time('createon');
-            $table->char('createbycode',50);
-            $table->time('updateon');
-            $table->char('updatebycode',50);
+            $table->string('paystatus');
+            $table->string('payremark');
+            $table->string('createbycode');
+            $table->string('updatebycode');
             $table->timestamps();
         });
     }

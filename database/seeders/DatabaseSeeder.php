@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
             'emp_role' => 'admin',
             'name' => 'ภูวเดช พาณิชยโสภา',
             'emp_status' => 'active',
-            'authcode' => 'authcode',
+            'authcode' => 'C001',
             'incentive' => 'incentive',
             'password' => Hash::make('1111'),
         ]);

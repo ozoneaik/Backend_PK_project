@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\inc_hd;
 use App\Models\QcMain;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class IncHdController extends Controller
 {
-    public function qc_month($year, $month)
-    {
+    public function qc_month($year, $month){
         $startOfMonth = "$year-$month-01";
 
         $amount_qc_users = QcMain::select('qc_user.emp_name', 'qc_log_data.empqc')
@@ -198,6 +200,51 @@ class IncHdController extends Controller
             return response()->json(['amount_qc_users' => null, 'data_teams' => null,],400);
         }
 
+
+    }
+
+
+
+    public function store(Request $request){
+        $datas = $request->datas;
+        $data_team = $request->NewData_team;
+
+        // ตรวจสอบว่ามี year และ month ที่ต้องการสร้างหรือไม่
+        $existingIncHd = inc_hd::where('yearkey', $data_team['year'])->where('monthkey', $data_team['month'])->first();
+        if($existingIncHd) {return response()->json(['msg' => 'มีข้อมูลสำหรับเดือน '.$data_team['month'].  '/' .$data_team['year']. ' นี้อยู่แล้ว'], 400);}
+
+        //Insert INTO inc_hds ( ทีม )
+        $IncHd = new inc_hd();
+        $IncHd->monthkey = $data_team['month'];
+        $IncHd->yearkey = $data_team['year'];
+        $IncHd->paydate = $data_team['month'] + 1;
+        $IncHd->workday = 22;
+        $IncHd->status = $data_team['status'];
+        $IncHd->numofemp = count($datas);
+        $IncHd->totalqcqty = $data_team['total_empqc_teams'];
+        $IncHd->totaltimepermonth = $data_team['average_time_HM']; // กำหนดค่าให้กับ IncHd
+        $IncHd->totaltimeperday = $data_team['average_time_HD'];
+        $IncHd->gradeteam = $data_team['average_grade'];
+        $IncHd->payamntteam = $data_team['total_receiveds'];
+        $IncHd->created_at = Carbon::now();
+        $IncHd->createbycode = auth()->user()->authcode;
+        $IncHd->updated_at = Carbon::now();
+        $IncHd->updatebycode = auth()->user()->authcode;
+
+
+        if ($IncHd->save()){
+            $InsertIncDt = App::make('App\Http\Controllers\IncDtController')->store($datas,$IncHd->id);
+            if ($InsertIncDt){
+                return  response()->json(['msg' => 'สร้างข้อมูลสำเร็จ'],200);
+//                $InsertIncDetail = App::make('App\Http\Controllers\IncDetailController')->store($IncHd->id);
+            }else{
+
+            }
+
+            return  response()->json(['msg' => 'สร้างข้อมูลสำเร็จ'],200);
+        }else{
+            return response()->json(['msg' => 'สร้างข้อมูลไม่สำเร็จ'],400);
+        }
 
     }
 

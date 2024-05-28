@@ -15,21 +15,19 @@ return new class extends Migration
     {
         Schema::create('inc_hds', function (Blueprint $table) {
             $table->id();
-            $table->integer('inc_id');
+            $table->integer('yearkey');
             $table->integer('monthkey');
-            $table->date('paydate');
+            $table->string('paydate');
             $table->integer('workday');
-            $table->char('status',50);
+            $table->string('status');
             $table->integer('numofemp');
             $table->integer('totalqcqty');
-            $table->time('totaltimepermonth');
-            $table->time('totaltimeperday');
-            $table->char('gradeteam',2);
+            $table->string('totaltimepermonth');
+            $table->string('totaltimeperday');
+            $table->string('gradeteam');
             $table->double('payamntteam');
-            $table->time('createon');
-            $table->char('createbycode',50);
-            $table->time('updateon')->nullable();
-            $table->char('updatebycode',50)->nullable();
+            $table->string('createbycode');
+            $table->string('updatebycode');
             $table->timestamps();
         });
     }

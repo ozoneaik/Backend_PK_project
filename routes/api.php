@@ -43,6 +43,10 @@ Route::middleware('auth:sanctum')->group(function () {
             // จัดการการคำนวณเกรด ใน Table QcRate
             Route::get('/calculate_grade', [QcRateController::class,'getRate']);
         });
+
+
+        //Insert Data to Database
+        Route::post('/qc_month/store', [IncHdController::class, 'store']);
     });
 
     //Products
