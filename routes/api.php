@@ -1,10 +1,15 @@
 <?php
 
+use App\Http\Controllers\AddYearController;
 use App\Http\Controllers\AuthController;
 
+use App\Http\Controllers\GetQcYear;
 use App\Http\Controllers\IncHdController;
 use App\Http\Controllers\QcProdController;
+use App\Http\Controllers\QcRateController;
+use App\Http\Controllers\QcTimeController;
 use App\Http\Controllers\QcWorkdayController;
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -25,7 +30,19 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Incentive
     Route::group(['prefix' => 'incentive'], function () {
-       Route::get('/index',[IncHdController::class,'index']);
+        //Add Year
+        Route::post('/add-year',[AddYearController::class,'addYear']);
+        Route::get('/list-year',[AddYearController::class,'ListYear']);
+
+
+        Route::get('/qc_year/{year}', [GetQcYear::class , 'getQcYear']);
+        Route::get('/qc_month/{year}/{month}', [IncHdController::class, 'qc_month']);
+        Route::group(['prefix' => 'manage'], function () {
+            // จัดการระดับการ QC ใน Table QcTime
+            Route::get('/qc_time', [QcTimeController::class, 'index']);
+            // จัดการการคำนวณเกรด ใน Table QcRate
+            Route::get('/calculate_grade', [QcRateController::class,'getRate']);
+        });
     });
 
     //Products
@@ -44,13 +61,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 
-Route::post('/signup', [AuthController::class, 'signup'])->name('signup');
 Route::post('/login', [AuthController::class, 'login']);
-
-Route::get('/qc_year/{year}', [\App\Http\Controllers\GetQcYear::class, 'getQcYear']);
-
-
-Route::get('get-years', [QcWorkdayController::class, 'getYears']);
 
 
 

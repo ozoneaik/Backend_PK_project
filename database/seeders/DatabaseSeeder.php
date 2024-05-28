@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\addYear;
 use App\Models\qc_level;
 use App\Models\qc_rate;
 use App\Models\qc_time;
@@ -84,6 +85,18 @@ class DatabaseSeeder extends Seeder
         ];
         foreach ($qcRates as $qcRate) {
             qc_rate::create($qcRate);
+        }
+
+        //Add Years
+        $addYears = [
+            ['year' => 2024,],
+            ['year' => 2023,],
+            ['year' => 2022,],
+            ['year' => 2021,],
+        ];
+
+        foreach ($addYears as $addYear) {
+            addYear::create($addYear);
         }
 
 

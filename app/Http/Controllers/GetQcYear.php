@@ -20,6 +20,13 @@ class GetQcYear extends Controller
             ->where('datekey', 'LIKE', "$year-%-%")
             ->groupBy(DB::raw("DATE_FORMAT(datekey, '%Y-%m')"))
             ->get();
-        return response()->json($results, 200);
+
+
+        if (count($results) > 0){
+            return response()->json(['results' => $results,'msg' => 'ตรวจพบรายสินค้าประจำปี '.$year], 200);
+
+        }else{
+            return response()->json(['results' => null,'msg' => 'ไม่พบรายการสินค้าประจำปี '.$year],400);
+        }
     }
 }

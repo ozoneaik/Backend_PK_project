@@ -20,4 +20,3 @@ Route::get('/', function () {
 
 
 Route::get('/users', [Controller::class,'index'])->name('index');
-Route::get('/singIn', [\App\Http\Controllers\AuthController::class,'SigninIndex'])->name('singIn');

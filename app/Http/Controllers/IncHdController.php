@@ -2,42 +2,39 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\QcMain;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class IncHdController extends Controller
 {
-    public function index()
+    public function qc_month($year, $month)
     {
+        $startOfMonth = "$year-$month-01";
 
-        $amount_qc_users = DB::connection('mysql_main_qc')
-            ->table('qc_log_data as ld')
-            ->select('qu.emp_name', 'ld.empqc',
-                DB::raw('COUNT(ld.empqc) as empqc_count'),
-                DB::raw('DATE_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(p.timeperpcs))), "%H:%i") as HM'),
-                DB::raw('DATE_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(p.timeperpcs)) / 22), "%H:%i") as HD'),
-                DB::raw('SUM(CASE WHEN lv.levelname = "Very easy" THEN 1 ELSE 0 END) AS level_very_easy'),
-                DB::raw('SUM(CASE WHEN lv.levelname = "Easy" THEN 1 ELSE 0 END) AS level_easy'),
-                DB::raw('SUM(CASE WHEN lv.levelname = "Middling" THEN 1 ELSE 0 END) AS level_middling'),
-                DB::raw('SUM(CASE WHEN lv.levelname = "Hard" THEN 1 ELSE 0 END) AS level_hard'),
-                DB::raw('SUM(CASE WHEN lv.levelname = "Very Hard" THEN 1 ELSE 0 END) AS level_very_hard'),
-                DB::raw('CASE
-            WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(p.timeperpcs)) / 22) >= "07:00" AND SEC_TO_TIME(SUM(TIME_TO_SEC(p.timeperpcs)) / 22) < "07:31" THEN "C"
-            WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(p.timeperpcs)) / 22) >= "07:31" AND SEC_TO_TIME(SUM(TIME_TO_SEC(p.timeperpcs)) / 22) < "08:00" THEN "B"
-            WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(p.timeperpcs)) / 22) >= "08:00" AND SEC_TO_TIME(SUM(TIME_TO_SEC(p.timeperpcs)) / 22) < "09:00" THEN "A"
-            WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(p.timeperpcs)) / 22) >= "09:00" THEN "A+"
-            ELSE "ไม่ผ่าน"
-        END AS grade'),
-
-
-            )
-            ->leftJoin('qc_prod as p', 'ld.skucode', '=', 'p.pid')
-            ->leftJoin('qc_level as lv', 'p.levelid', '=', 'lv.levelid')
-            ->leftJoin('qc_user as qu', 'ld.empqc', '=', 'qu.emp_no')
-            ->where('qu.emp_name', 'NOT like', 'QC%') // กรอง emp_name ที่มี QC นำหน้า
-            ->where('ld.empqc', 'NOT like', 'QC%') // กรอง empqc ที่มี QC นำหน้า
-            ->whereBetween('datekey', ['2024-04-01', DB::raw('LAST_DAY("2024-04-01")')])
-            ->groupBy('qu.emp_name', 'ld.empqc')
+        $amount_qc_users = QcMain::select('qc_user.emp_name', 'qc_log_data.empqc')
+            ->selectRaw('COUNT(qc_log_data.empqc) as empqc_count')
+            ->selectRaw('DATE_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs))), "%H:%i") as HM')
+            ->selectRaw('DATE_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / 22), "%H:%i") as HD')
+            ->selectRaw('SUM(CASE WHEN qc_level.levelname = "Very easy" THEN 1 ELSE 0 END) AS level_very_easy')
+            ->selectRaw('SUM(CASE WHEN qc_level.levelname = "Easy" THEN 1 ELSE 0 END) AS level_easy')
+            ->selectRaw('SUM(CASE WHEN qc_level.levelname = "Middling" THEN 1 ELSE 0 END) AS level_middling')
+            ->selectRaw('SUM(CASE WHEN qc_level.levelname = "Hard" THEN 1 ELSE 0 END) AS level_hard')
+            ->selectRaw('SUM(CASE WHEN qc_level.levelname = "Very Hard" THEN 1 ELSE 0 END) AS level_very_hard')
+            ->selectRaw('CASE
+                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / 22) >= "07:00" AND SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / 22) < "07:31" THEN "C"
+                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / 22) >= "07:31" AND SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / 22) < "08:00" THEN "B"
+                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / 22) >= "08:00" AND SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / 22) < "09:00" THEN "A"
+                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / 22) >= "09:00" THEN "A+"
+                ELSE "ไม่ผ่าน"
+            END AS grade')
+            ->leftJoin('qc_prod', 'qc_log_data.skucode', '=', 'qc_prod.pid')
+            ->leftJoin('qc_level', 'qc_prod.levelid', '=', 'qc_level.levelid')
+            ->leftJoin('qc_user', 'qc_log_data.empqc', '=', 'qc_user.emp_no')
+            ->where('qc_user.emp_name', 'NOT LIKE', 'QC%')
+            ->where('qc_log_data.empqc', 'NOT LIKE', 'QC%')
+            ->whereBetween('qc_log_data.datekey', [$startOfMonth, DB::raw("LAST_DAY('$startOfMonth')")])
+            ->groupBy('qc_user.emp_name', 'qc_log_data.empqc')
             ->get();
 
 
@@ -56,44 +53,54 @@ class IncHdController extends Controller
 
         $total_users = count($amount_qc_users);
 
-        foreach ($amount_qc_users as $index=>$user) {
-            switch ($user->grade) {
-                case 'A+':
-                    $user->rateVeryEasy = '0.125';
-                    $user->rateEasy = '0.1875';
-                    $user->rateMiddling = '0.250';
-                    $user->rateHard = '0.3125';
-                    $user->rateVeryHard = '0.375';
-                    break;
-                case 'A':
-                    $user->rateVeryEasy = '0.113';
-                    $user->rateEasy = '0.169';
-                    $user->rateMiddling = '0.225';
-                    $user->rateHard = '0.281';
-                    $user->rateVeryHard = '0.338';
-                    break;
-                case 'B':
-                    $user->rateVeryEasy = '0.104';
-                    $user->rateEasy = '0.156';
-                    $user->rateMiddling = '0.208';
-                    $user->rateHard = '0.260';
-                    $user->rateVeryHard = '0.313';
-                    break;
-                case 'C':
-                    $user->rateVeryEasy = '0.083';
-                    $user->rateEasy = '0.125';
-                    $user->rateMiddling = '0.167';
-                    $user->rateHard = '0.208';
-                    $user->rateVeryHard = '0.250';
-                    break;
-                default:
-                    $user->rateVeryEasy = '0';
-                    $user->rateEasy = '0';
-                    $user->rateMiddling = '0';
-                    $user->rateHard = '0';
-                    $user->rateVeryHard = '0';
-                    break;
+        $status = true;
+        foreach ($amount_qc_users as $index => $user) {
+
+            $user->rateVeryEasy = '0';
+            $user->rateEasy = '0';
+            $user->rateMiddling = '0';
+            $user->rateHard = '0';
+            $user->rateVeryHard = '0';
+            if ($status) {
+                switch ($user->grade) {
+                    case 'A+':
+                        $user->rateVeryEasy = '0.125';
+                        $user->rateEasy = '0.1875';
+                        $user->rateMiddling = '0.250';
+                        $user->rateHard = '0.3125';
+                        $user->rateVeryHard = '0.375';
+                        break;
+                    case 'A':
+                        $user->rateVeryEasy = '0.113';
+                        $user->rateEasy = '0.169';
+                        $user->rateMiddling = '0.225';
+                        $user->rateHard = '0.281';
+                        $user->rateVeryHard = '0.338';
+                        break;
+                    case 'B':
+                        $user->rateVeryEasy = '0.104';
+                        $user->rateEasy = '0.156';
+                        $user->rateMiddling = '0.208';
+                        $user->rateHard = '0.260';
+                        $user->rateVeryHard = '0.313';
+                        break;
+                    case 'C':
+                        $user->rateVeryEasy = '0.083';
+                        $user->rateEasy = '0.125';
+                        $user->rateMiddling = '0.167';
+                        $user->rateHard = '0.208';
+                        $user->rateVeryHard = '0.250';
+                        break;
+                    default:
+                        $user->rateVeryEasy = '0';
+                        $user->rateEasy = '0';
+                        $user->rateMiddling = '0';
+                        $user->rateHard = '0';
+                        $user->rateVeryHard = '0';
+                        break;
+                }
             }
+
 
             // หาผลรวมยอดรับบุคคลของแต่ละคน
             $user->total_person_received = round(
@@ -103,8 +110,6 @@ class IncHdController extends Controller
                 ($user->level_hard * $user->rateHard) +
                 ($user->level_very_hard * $user->rateVeryHard), 2
             );
-
-
 
 
             //Teams
@@ -146,27 +151,25 @@ class IncHdController extends Controller
         }// end for
 
         //เก็บยอดรับทีม
-        if ($average_grade == 'A+' || $average_grade == 'A'){
+        if ($average_grade == 'A+' || $average_grade == 'A') {
             $total_received_team = 200;
-        }else if ($average_grade == 'B'){
+        } else if ($average_grade == 'B') {
             $total_received_team = 150;
-        }else if ($average_grade == 'C'){
+        } else if ($average_grade == 'C') {
             $total_received_team = 100;
-        }else{
+        } else {
             $total_received_team = 0;
         }
 
         //หาผลรวมยอดรับสุทธิของแต่ละคน
         $total_receiveds = 0;
-        foreach ($amount_qc_users as $index=>$user){
-            $user->total_received = $user->total_person_received+$total_received_team;
-            if ($index == 1){
+        foreach ($amount_qc_users as $index => $user) {
+            $user->total_received = $user->total_person_received + $total_received_team;
+            if ($index == 1) {
 //                dd($user->total_received);
             }
             $total_receiveds += $user->total_received;
         }
-
-
 
 
         $data_teams = [
@@ -189,12 +192,11 @@ class IncHdController extends Controller
 //        dd($data_teams);
 //        dd($average_time_HD, $average_grade, $total_empqc_teams, $average_time_HM, $totalVeryEasy / count($amount_qc_users));
 
-        return response()->json(
-            [
-                'amount_qc_users' => $amount_qc_users,
-                'data_teams' => $data_teams,
-            ]
-            );
+        if ($amount_qc_users){
+            return response()->json(['amount_qc_users' => $amount_qc_users, 'data_teams' => $data_teams,],200);
+        }else{
+            return response()->json(['amount_qc_users' => null, 'data_teams' => null,],400);
+        }
 
 
     }
