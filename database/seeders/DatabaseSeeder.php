@@ -49,7 +49,7 @@ class DatabaseSeeder extends Seeder
         $times = [
             ['ti_id' => 1, 'time' => '09:00:00', 'grade' => 'A+'],
             ['ti_id' => 2, 'time' => '08:00:00', 'grade' => 'A'],
-            ['ti_id' => 3, 'time' => '07:31:00', 'grade' => 'B+'],
+            ['ti_id' => 3, 'time' => '07:31:00', 'grade' => 'B'],
             ['ti_id' => 4, 'time' => '07:00:00', 'grade' => 'C'],
         ];
         foreach ($times as $time) {

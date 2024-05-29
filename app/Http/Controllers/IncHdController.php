@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\inc_hd;
+use App\Models\qc_rate;
+use App\Models\qc_time;
 use App\Models\QcMain;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\App;
@@ -11,23 +13,34 @@ use Illuminate\Http\Request;
 
 class IncHdController extends Controller
 {
-    public function qc_month($year, $month){
+
+
+
+    public function qc_month($year, $month,$status){
+
+        if ($status != '-'){
+            $InsertIncDt = App::make('App\Http\Controllers\IncHdAfterSaveContoller')->getDataLocal($year, $month,$status);
+        }
         $startOfMonth = "$year-$month-01";
+        $workday = 22;
+        //ดึงข้อมูลจาก times
+        $times = qc_time::orderBy('ti_id','asc')->get();
+        $timeValues = $times->pluck('time')->toArray();
 
         $amount_qc_users = QcMain::select('qc_user.emp_name', 'qc_log_data.empqc')
             ->selectRaw('COUNT(qc_log_data.empqc) as empqc_count')
             ->selectRaw('DATE_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs))), "%H:%i") as HM')
-            ->selectRaw('DATE_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / 22), "%H:%i") as HD')
+            ->selectRaw('DATE_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / '.$workday.'), "%H:%i") as HD')
             ->selectRaw('SUM(CASE WHEN qc_level.levelname = "Very easy" THEN 1 ELSE 0 END) AS level_very_easy')
             ->selectRaw('SUM(CASE WHEN qc_level.levelname = "Easy" THEN 1 ELSE 0 END) AS level_easy')
             ->selectRaw('SUM(CASE WHEN qc_level.levelname = "Middling" THEN 1 ELSE 0 END) AS level_middling')
             ->selectRaw('SUM(CASE WHEN qc_level.levelname = "Hard" THEN 1 ELSE 0 END) AS level_hard')
             ->selectRaw('SUM(CASE WHEN qc_level.levelname = "Very Hard" THEN 1 ELSE 0 END) AS level_very_hard')
             ->selectRaw('CASE
-                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / 22) >= "07:00" AND SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / 22) < "07:31" THEN "C"
-                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / 22) >= "07:31" AND SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / 22) < "08:00" THEN "B"
-                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / 22) >= "08:00" AND SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / 22) < "09:00" THEN "A"
-                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / 22) >= "09:00" THEN "A+"
+                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / '.$workday.') >= "' . $timeValues[3] . '" AND SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / '.$workday.') < "' . $timeValues[2] . '" THEN "C"
+                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / '.$workday.') >= "' . $timeValues[2] . '" AND SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / '.$workday.') < "' . $timeValues[1] . '" THEN "B"
+                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / '.$workday.') >= "' . $timeValues[1] . '" AND SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / '.$workday.') < "' . $timeValues[0] . '" THEN "A"
+                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / '.$workday.') >= "' . $timeValues[0] . '" THEN "A+"
                 ELSE "ไม่ผ่าน"
             END AS grade')
             ->leftJoin('qc_prod', 'qc_log_data.skucode', '=', 'qc_prod.pid')
@@ -41,8 +54,6 @@ class IncHdController extends Controller
 
 
         $total_empqc_teams = 0;
-
-
         $total_HD = 0; //HD
         $total_HM = 0; //HM
         $totalVeryEasy = 0; //totalVeryEasy
@@ -51,47 +62,46 @@ class IncHdController extends Controller
         $totalHard = 0;
         $totalVeryHard = 0;
         $total_person_received_teams = 0;
-
-
         $total_users = count($amount_qc_users);
+        $statuss = true;
 
-        $status = true;
+        //ดึงข้อมูล rate
+        $rate = qc_rate::orderBy('ra_id','asc')->get();
         foreach ($amount_qc_users as $index => $user) {
-
             $user->rateVeryEasy = '0';
             $user->rateEasy = '0';
             $user->rateMiddling = '0';
             $user->rateHard = '0';
             $user->rateVeryHard = '0';
-            if ($status) {
+            if (!$statuss) {
                 switch ($user->grade) {
                     case 'A+':
-                        $user->rateVeryEasy = '0.125';
-                        $user->rateEasy = '0.1875';
-                        $user->rateMiddling = '0.250';
-                        $user->rateHard = '0.3125';
-                        $user->rateVeryHard = '0.375';
+                        $user->rateVeryEasy = $rate[3]['rate'];
+                        $user->rateEasy = $rate[7]['rate'];
+                        $user->rateMiddling = $rate[11]['rate'];
+                        $user->rateHard = $rate[15]['rate'];
+                        $user->rateVeryHard = $rate[19]['rate'];
                         break;
                     case 'A':
-                        $user->rateVeryEasy = '0.113';
-                        $user->rateEasy = '0.169';
-                        $user->rateMiddling = '0.225';
-                        $user->rateHard = '0.281';
-                        $user->rateVeryHard = '0.338';
+                        $user->rateVeryEasy = $rate[2]['rate'];
+                        $user->rateEasy = $rate[6]['rate'];
+                        $user->rateMiddling = $rate[10]['rate'];
+                        $user->rateHard = $rate[14]['rate'];
+                        $user->rateVeryHard = $rate[18]['rate'];
                         break;
                     case 'B':
-                        $user->rateVeryEasy = '0.104';
-                        $user->rateEasy = '0.156';
-                        $user->rateMiddling = '0.208';
-                        $user->rateHard = '0.260';
-                        $user->rateVeryHard = '0.313';
+                        $user->rateVeryEasy = $rate[1]['rate'];
+                        $user->rateEasy = $rate[5]['rate'];
+                        $user->rateMiddling = $rate[9]['rate'];
+                        $user->rateHard = $rate[13]['rate'];
+                        $user->rateVeryHard = $rate[17]['rate'];
                         break;
                     case 'C':
-                        $user->rateVeryEasy = '0.083';
-                        $user->rateEasy = '0.125';
-                        $user->rateMiddling = '0.167';
-                        $user->rateHard = '0.208';
-                        $user->rateVeryHard = '0.250';
+                        $user->rateVeryEasy = $rate[0]['rate'];
+                        $user->rateEasy = $rate[4]['rate'];
+                        $user->rateMiddling = $rate[8]['rate'];
+                        $user->rateHard = $rate[12]['rate'];
+                        $user->rateVeryHard = $rate[16]['rate'];
                         break;
                     default:
                         $user->rateVeryEasy = '0';
@@ -103,7 +113,6 @@ class IncHdController extends Controller
                 }
             }
 
-
             // หาผลรวมยอดรับบุคคลของแต่ละคน
             $user->total_person_received = round(
                 ($user->level_easy * $user->rateEasy) +
@@ -112,7 +121,6 @@ class IncHdController extends Controller
                 ($user->level_hard * $user->rateHard) +
                 ($user->level_very_hard * $user->rateVeryHard), 2
             );
-
 
             //Teams
             // หาผลรวมปริมาณ QC รวมทั้งหมด
@@ -129,13 +137,13 @@ class IncHdController extends Controller
             $average_minutes = $average_minutes % 60;
             $average_time_HM = sprintf('%02d:%02d:00', $average_hours, $average_minutes);
             // ตัดเกรดตามเวลาเฉลี่ย
-            if ($average_time_HD >= '07:00:00' && $average_time_HD < '07:31:00') {
+            if ($average_time_HD >= $timeValues[3] && $average_time_HD < $timeValues[2]) {
                 $average_grade = 'C';
-            } else if ($average_time_HD >= '07:31:00' && $average_time_HD < '08:00:00') {
+            } else if ($average_time_HD >= $timeValues[2] && $average_time_HD < $timeValues[1]) {
                 $average_grade = 'B';
-            } else if ($average_time_HD >= '08:00:00' && $average_time_HD < '09:00:00') {
+            } else if ($average_time_HD >= $timeValues[1] && $average_time_HD < $timeValues[0]) {
                 $average_grade = 'A';
-            } else if ($average_time_HD >= '09:00:00') {
+            } else if ($average_time_HD >= $timeValues[0]) {
                 $average_grade = 'A+';
             } else {
                 $average_grade = 'ไม่ผ่าน';
@@ -147,9 +155,7 @@ class IncHdController extends Controller
             $totalMiddling += $user->level_middling;
             $totalHard += $user->level_hard;
             $totalVeryHard += $user->level_very_hard;
-
             $total_person_received_teams += $user->total_person_received;
-
         }// end for
 
         //เก็บยอดรับทีม
@@ -188,19 +194,14 @@ class IncHdController extends Controller
             'totalPersonReceived' => $total_person_received_teams,
             'total_received_team' => $total_received_team,
             'total_receiveds' => $total_receiveds,
-
             'total_empqc_teams' => $total_empqc_teams,
         ];
-//        dd($data_teams);
-//        dd($average_time_HD, $average_grade, $total_empqc_teams, $average_time_HM, $totalVeryEasy / count($amount_qc_users));
 
         if ($amount_qc_users){
             return response()->json(['amount_qc_users' => $amount_qc_users, 'data_teams' => $data_teams,],200);
         }else{
             return response()->json(['amount_qc_users' => null, 'data_teams' => null,],400);
         }
-
-
     }
 
 
@@ -233,20 +234,19 @@ class IncHdController extends Controller
 
 
         if ($IncHd->save()){
-            $InsertIncDt = App::make('App\Http\Controllers\IncDtController')->store($datas,$IncHd->id);
+            $InsertIncDt = App::make('App\Http\Controllers\IncDtController')->store($datas,$IncHd->id,$data_team['month'],$data_team['year']);
             if ($InsertIncDt){
                 return  response()->json(['msg' => 'สร้างข้อมูลสำเร็จ'],200);
-//                $InsertIncDetail = App::make('App\Http\Controllers\IncDetailController')->store($IncHd->id);
             }else{
-
+                return response()->json(['msg' => 'สร้างข้อมูลไม่สำเร็จ'],400);
             }
-
-            return  response()->json(['msg' => 'สร้างข้อมูลสำเร็จ'],200);
         }else{
             return response()->json(['msg' => 'สร้างข้อมูลไม่สำเร็จ'],400);
         }
 
     }
+
+
 
 }
 

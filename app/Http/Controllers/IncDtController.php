@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\inc_dt;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 
 class IncDtController extends Controller
 {
     //
 
 
-    public function store($datas, $IncHdId)
+    public function store($datas, $IncHdId,$month,$year)
     {
         foreach ($datas as $key => $data) {
             for ($i = 1; $i <= 5; $i++) {
@@ -62,8 +63,15 @@ class IncDtController extends Controller
                 $IncDt->save();
             }
 
+            $InsertIncDetail = App::make('App\Http\Controllers\IncDetailController')->store($IncHdId,$month,$year,$IncDt->empqccode);
+
         }
 
         return true;
+
+    }
+
+    public function update(){
+        return 0;
     }
 }

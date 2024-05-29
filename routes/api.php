@@ -36,7 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
         Route::get('/qc_year/{year}', [GetQcYear::class , 'getQcYear']);
-        Route::get('/qc_month/{year}/{month}', [IncHdController::class, 'qc_month']);
+        Route::get('/qc_month/{year}/{month}/{status}', [IncHdController::class, 'qc_month']);
         Route::group(['prefix' => 'manage'], function () {
             // จัดการระดับการ QC ใน Table QcTime
             Route::get('/qc_time', [QcTimeController::class, 'index']);

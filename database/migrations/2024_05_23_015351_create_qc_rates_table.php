@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->integer('ra_id');
             $table->integer('le_id');
-            $table->char('grade',10);
+            $table->string('grade');
             $table->double('rate');
             $table->timestamps();
         });

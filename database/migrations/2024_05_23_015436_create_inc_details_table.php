@@ -17,12 +17,12 @@ return new class extends Migration
             $table->id();
             $table->integer('inc_id');
             $table->integer('monthkey');
-            $table->char('empqccode',50);
-            $table->char('skucode',50);
-            $table->char('skuname',100);
+            $table->string('empqccode');
+            $table->string('skucode');
+            $table->string('skuname');
             $table->integer('skuqty');
             $table->integer('le_id');
-            $table->char('le_name',10);
+            $table->string('le_name');
             $table->time('timeperpcs');
             $table->timestamps();
         });
