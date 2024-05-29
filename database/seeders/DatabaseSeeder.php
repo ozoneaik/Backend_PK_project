@@ -61,27 +61,27 @@ class DatabaseSeeder extends Seeder
             ['ra_id' => 1, 'le_id' => 1, 'grade' => 'C', 'rate' => 0.0833],
             ['ra_id' => 2, 'le_id' => 1, 'grade' => 'B', 'rate' => 0.1042],
             ['ra_id' => 3, 'le_id' => 1, 'grade' => 'A', 'rate' => 0.1125],
-            ['ra_id' => 4, 'le_id' => 1, 'grade' => 'A+', 'rate' => 0.125],
+            ['ra_id' => 4, 'le_id' => 1, 'grade' => 'A+', 'rate' => 0.1250],
 
-            ['ra_id' => 5, 'le_id' => 2, 'grade' => 'C', 'rate' => 0.125],
+            ['ra_id' => 5, 'le_id' => 2, 'grade' => 'C', 'rate' => 0.1250],
             ['ra_id' => 6, 'le_id' => 2, 'grade' => 'B', 'rate' => 0.1563],
             ['ra_id' => 7, 'le_id' => 2, 'grade' => 'A', 'rate' => 0.1688],
             ['ra_id' => 8, 'le_id' => 2, 'grade' => 'A+', 'rate' => 0.1875],
 
             ['ra_id' => 9, 'le_id' => 3, 'grade' => 'C', 'rate' => 0.1667],
             ['ra_id' => 10, 'le_id' => 3, 'grade' => 'B', 'rate' => 0.2083],
-            ['ra_id' => 11, 'le_id' => 3, 'grade' => 'A', 'rate' => 0.225],
-            ['ra_id' => 12, 'le_id' => 3, 'grade' => 'A+', 'rate' => 0.25],
+            ['ra_id' => 11, 'le_id' => 3, 'grade' => 'A', 'rate' => 0.2250],
+            ['ra_id' => 12, 'le_id' => 3, 'grade' => 'A+', 'rate' => 0.2500],
 
-            ['ra_id' => 13, 'le_id' => 4, 'grade' => 'C', 'rate' => 0.25],
+            ['ra_id' => 13, 'le_id' => 4, 'grade' => 'C', 'rate' => 0.2500],
             ['ra_id' => 14, 'le_id' => 4, 'grade' => 'B', 'rate' => 0.3125],
             ['ra_id' => 15, 'le_id' => 4, 'grade' => 'A', 'rate' => 0.3375],
-            ['ra_id' => 16, 'le_id' => 4, 'grade' => 'A+', 'rate' => 0.375],
+            ['ra_id' => 16, 'le_id' => 4, 'grade' => 'A+', 'rate' => 0.3750],
 
-            ['ra_id' => 17, 'le_id' => 5, 'grade' => 'C', 'rate' => 0.25],
+            ['ra_id' => 17, 'le_id' => 5, 'grade' => 'C', 'rate' => 0.2500],
             ['ra_id' => 18, 'le_id' => 5, 'grade' => 'B', 'rate' => 0.3125],
             ['ra_id' => 19, 'le_id' => 5, 'grade' => 'A', 'rate' => 0.3375],
-            ['ra_id' => 20, 'le_id' => 5, 'grade' => 'A+', 'rate' => 0.375],
+            ['ra_id' => 20, 'le_id' => 5, 'grade' => 'A+', 'rate' => 0.3750],
         ];
         foreach ($qcRates as $qcRate) {
             qc_rate::create($qcRate);

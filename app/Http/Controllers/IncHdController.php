@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\inc_dt;
 use App\Models\inc_hd;
 use App\Models\qc_rate;
 use App\Models\qc_time;
@@ -73,8 +74,10 @@ class IncHdController extends Controller
             $user->rateMiddling = '0';
             $user->rateHard = '0';
             $user->rateVeryHard = '0';
-            if (!$statuss) {
+            if ($statuss) {
+
                 switch ($user->grade) {
+
                     case 'A+':
                         $user->rateVeryEasy = $rate[3]['rate'];
                         $user->rateEasy = $rate[7]['rate'];
@@ -212,39 +215,55 @@ class IncHdController extends Controller
 
         // ตรวจสอบว่ามี year และ month ที่ต้องการสร้างหรือไม่
         $existingIncHd = inc_hd::where('yearkey', $data_team['year'])->where('monthkey', $data_team['month'])->first();
-        if($existingIncHd) {return response()->json(['msg' => 'มีข้อมูลสำหรับเดือน '.$data_team['month'].  '/' .$data_team['year']. ' นี้อยู่แล้ว'], 400);}
-
-        //Insert INTO inc_hds ( ทีม )
-        $IncHd = new inc_hd();
-        $IncHd->monthkey = $data_team['month'];
-        $IncHd->yearkey = $data_team['year'];
-        $IncHd->paydate = $data_team['month'] + 1;
-        $IncHd->workday = 22;
-        $IncHd->status = $data_team['status'];
-        $IncHd->numofemp = count($datas);
-        $IncHd->totalqcqty = $data_team['total_empqc_teams'];
-        $IncHd->totaltimepermonth = $data_team['average_time_HM']; // กำหนดค่าให้กับ IncHd
-        $IncHd->totaltimeperday = $data_team['average_time_HD'];
-        $IncHd->gradeteam = $data_team['average_grade'];
-        $IncHd->payamntteam = $data_team['total_receiveds'];
-        $IncHd->created_at = Carbon::now();
-        $IncHd->createbycode = auth()->user()->authcode;
-        $IncHd->updated_at = Carbon::now();
-        $IncHd->updatebycode = auth()->user()->authcode;
-
-
-        if ($IncHd->save()){
-            $InsertIncDt = App::make('App\Http\Controllers\IncDtController')->store($datas,$IncHd->id,$data_team['month'],$data_team['year']);
-            if ($InsertIncDt){
-                return  response()->json(['msg' => 'สร้างข้อมูลสำเร็จ'],200);
-            }else{
-                return response()->json(['msg' => 'สร้างข้อมูลไม่สำเร็จ'],400);
-            }
-        }else{
-            return response()->json(['msg' => 'สร้างข้อมูลไม่สำเร็จ'],400);
+        if($existingIncHd) {
+            return response()->json(['msg' => 'มีข้อมูลสำหรับเดือน '.$data_team['month'].  '/' .$data_team['year']. ' นี้อยู่แล้ว'], 400);
         }
 
+        // เริ่มการทำธุรกรรม
+        DB::beginTransaction();
+
+        try {
+            // Insert INTO inc_hds (ทีม)
+            $IncHd = new inc_hd();
+            $IncHd->monthkey = $data_team['month'];
+            $IncHd->yearkey = $data_team['year'];
+            $IncHd->paydate = $data_team['month'] + 1;
+            $IncHd->workday = 22;
+            $IncHd->status = $data_team['status'];
+            $IncHd->numofemp = count($datas);
+            $IncHd->totalqcqty = $data_team['total_empqc_teams'];
+            $IncHd->totaltimepermonth = $data_team['average_time_HM']; // กำหนดค่าให้กับ IncHd
+            $IncHd->totaltimeperday = $data_team['average_time_HD'];
+            $IncHd->gradeteam = $data_team['average_grade'];
+            $IncHd->payamntteam = $data_team['total_receiveds'];
+            $IncHd->created_at = Carbon::now();
+            $IncHd->createbycode = auth()->user()->authcode;
+            $IncHd->updated_at = Carbon::now();
+            $IncHd->updatebycode = auth()->user()->authcode;
+
+            if ($IncHd->save()) {
+                $InsertIncDt = App::make('App\Http\Controllers\IncDtController')->store($datas, $IncHd->id, $data_team['month'], $data_team['year']);
+                if ($InsertIncDt) {
+                    // Commit การทำธุรกรรมถ้าทุกอย่างสำเร็จ
+                    DB::commit();
+                    return response()->json(['msg' => 'สร้างข้อมูลสำเร็จ'], 200);
+                } else {
+                    // Rollback การทำธุรกรรมถ้ามีข้อผิดพลาด
+                    DB::rollBack();
+                    return response()->json(['msg' => 'สร้างข้อมูลไม่สำเร็จ'], 400);
+                }
+            } else {
+                // Rollback การทำธุรกรรมถ้าการบันทึก $IncHd ไม่สำเร็จ
+                DB::rollBack();
+                return response()->json(['msg' => 'สร้างข้อมูลไม่สำเร็จ'], 400);
+            }
+        } catch (\Exception $e) {
+            // Rollback การทำธุรกรรมถ้ามีข้อผิดพลาด
+            DB::rollBack();
+            return response()->json(['msg' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()], 500);
+        }
     }
+
 
 
 

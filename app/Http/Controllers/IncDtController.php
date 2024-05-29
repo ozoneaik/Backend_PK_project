@@ -14,8 +14,11 @@ class IncDtController extends Controller
 
     public function store($datas, $IncHdId,$month,$year)
     {
+//        dd($datas);
         foreach ($datas as $key => $data) {
+
             for ($i = 1; $i <= 5; $i++) {
+
                 $IncDt = new inc_dt();
                 $IncDt->inc_id = $IncHdId;
                 $IncDt->empqccode = $data['empqc'];
@@ -26,27 +29,27 @@ class IncDtController extends Controller
                 switch ($i) {
                     case 1:
                         $le_name = 'Very Easy';
-                        $rate = $data['rateVeryEasy'];
+                        $rate = floatval($data['rateVeryEasy']);
                         break;
                     case 2:
                         $le_name = 'Easy';
-                        $rate = $data['rateEasy'];
+                        $rate = floatval($data['rateEasy']);
                         break;
                     case 3:
                         $le_name = 'Middling';
-                        $rate = $data['rateMiddling'];
+                        $rate = floatval($data['rateMiddling']);
                         break;
                     case 4:
                         $le_name = 'Hard';
-                        $rate = $data['rateHard'];
+                        $rate = floatval($data['rateHard']);
                         break;
                     case 5:
                         $le_name = 'Very Hard';
-                        $rate = $data['rateVeryHard'];
+                        $rate = floatval($data['rateVeryHard']);
                         break;
                     default:
                         $le_name = '';
-                        $rate = 0;
+                        $rate = 0.0;
                 }
 
                 $IncDt->le_id = $i;
@@ -66,6 +69,7 @@ class IncDtController extends Controller
             $InsertIncDetail = App::make('App\Http\Controllers\IncDetailController')->store($IncHdId,$month,$year,$IncDt->empqccode);
 
         }
+
 
         return true;
 
