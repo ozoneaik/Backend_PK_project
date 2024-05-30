@@ -30,6 +30,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Incentive
     Route::group(['prefix' => 'incentive'], function () {
+
+        Route::get('/checkIncHd/{year}/{month}', [IncHdController::class, 'checkIncHd']);
         //Add Year
         Route::post('/add-year',[AddYearController::class,'addYear']);
         Route::get('/list-year',[AddYearController::class,'ListYear']);

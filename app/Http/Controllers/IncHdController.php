@@ -15,13 +15,23 @@ use Illuminate\Http\Request;
 class IncHdController extends Controller
 {
 
+    public function checkIncHd($year, $month){
+        $check = inc_hd::where('yearkey', $year)->where('monthkey', $month)->first();
+        if ($check){
+            return response()->json(['check' => $check,'msg' => 'ต้องการอัพเดทข้อมูลหรือไม่'],200);
+        }else{
+            return response()->json(['check' => null,'msg' => 'ไม่เจอข้อมูล'],400);
+        }
+    }
+
 
 
     public function qc_month($year, $month,$status){
 
         if ($status != '-'){
-            $InsertIncDt = App::make('App\Http\Controllers\IncHdAfterSaveContoller')->getDataLocal($year, $month,$status);
+            return App::make('App\Http\Controllers\IncHdAfterSaveContoller')->getDataLocal($year, $month,$status);
         }
+
         $startOfMonth = "$year-$month-01";
         $workday = 22;
         //ดึงข้อมูลจาก times

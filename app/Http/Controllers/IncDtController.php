@@ -57,7 +57,7 @@ class IncDtController extends Controller
                 $IncDt->rate = $rate;
 
                 $IncDt->payamnt = $data['total_received'];
-                $IncDt->paystatus = $data['status'];
+                $IncDt->paystatus = $data['paystatus'];
                 $IncDt->payremark = 'จ่าย ไม่เจ่าย';
                 $IncDt->createbycode = auth()->user()->authcode;
                 $IncDt->created_at = Carbon::now();
