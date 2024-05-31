@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AddYearController;
+use App\Http\Controllers\ApproveIncHdController;
 use App\Http\Controllers\AuthController;
 
 use App\Http\Controllers\GetQcYear;
@@ -49,6 +50,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
         //Insert Data to Database
         Route::post('/qc_month/store', [IncHdController::class, 'store']);
+        Route::post('/qc_month/update', [IncHdController::class, 'update']);
+
+        //approve by QC
+        Route::post('/qc_month/qc/update',[ApproveIncHdController::class,'ApproveByQC']);
+        Route::post('/qc_month/hr/update',[ApproveIncHdController::class,'ApproveByHR']);
+        Route::post('/qc_month/hr/confirmpaydate',[ApproveIncHdController::class,'ConfirmPayDate']);
+
+        //User manage
+        Route::get('/user-list',[\App\Http\Controllers\ManageUserController::class,'userList']);
     });
 
     //Products
@@ -59,15 +69,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/update/{id}', [QcProdController::class, 'update']);
     });
 
-    Route::group(['prefix' => 'workday'], function () {
-        Route::get('/index', [QcWorkdayController::class, 'index']);
-        Route::post('/store', [QcWorkdayController::class, 'store']);
-        Route::get('get-years', [QcWorkdayController::class, 'getYears']);
-    });
-
 });
 
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/signup', [AuthController::class, 'signup']);
 
 
 

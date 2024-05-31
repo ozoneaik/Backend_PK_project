@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\inc_detail;
 use App\Models\inc_dt;
 use App\Models\inc_hd;
 use App\Models\qc_rate;
@@ -15,23 +15,21 @@ use Illuminate\Http\Request;
 class IncHdController extends Controller
 {
 
+    //เช็คว่า มีข้อมูลนี้อยู่ในฐานข้อมูลหรือไม่ จากหน้าแก้ไข 😀
     public function checkIncHd($year, $month){
         $check = inc_hd::where('yearkey', $year)->where('monthkey', $month)->first();
         if ($check){
-            return response()->json(['check' => $check,'msg' => 'ต้องการอัพเดทข้อมูลหรือไม่'],200);
+            return response()->json(['check' => $check,'msg' => 'ต้องการอัพเดทข้อมูลหรือไม่','inc_id'=>$check->id],200);
         }else{
             return response()->json(['check' => null,'msg' => 'ไม่เจอข้อมูล'],400);
         }
     }
 
-
-
+    //ดึงข้อมูลจาก .30 แล้วคำนวณเพิ่อนำข้อมูลมาแสดง เตรียมส่งให้บันทึกไปยัง postgres😁
     public function qc_month($year, $month,$status){
-
         if ($status != '-'){
             return App::make('App\Http\Controllers\IncHdAfterSaveContoller')->getDataLocal($year, $month,$status);
         }
-
         $startOfMonth = "$year-$month-01";
         $workday = 22;
         //ดึงข้อมูลจาก times
@@ -211,14 +209,13 @@ class IncHdController extends Controller
         ];
 
         if ($amount_qc_users){
-            return response()->json(['amount_qc_users' => $amount_qc_users, 'data_teams' => $data_teams,],200);
+            return response()->json(['amount_qc_users' => $amount_qc_users, 'data_teams' => $data_teams,'msg' => 'ดึงข้อมูลสำเร็จ'],200);
         }else{
-            return response()->json(['amount_qc_users' => null, 'data_teams' => null,],400);
+            return response()->json(['amount_qc_users' => null, 'data_teams' => null,'msg' => 'ดึงข้อมูลไม่สำเร็จ'],400);
         }
     }
 
-
-
+    //สร้างข้อมูลลงใน ฐานข้อมูล😂
     public function store(Request $request){
         $datas = $request->datas;
         $data_team = $request->NewData_team;
@@ -250,6 +247,7 @@ class IncHdController extends Controller
             $IncHd->createbycode = auth()->user()->authcode;
             $IncHd->updated_at = Carbon::now();
             $IncHd->updatebycode = auth()->user()->authcode;
+            $IncHd->caldate = Carbon::now();
 
             if ($IncHd->save()) {
                 $InsertIncDt = App::make('App\Http\Controllers\IncDtController')->store($datas, $IncHd->id, $data_team['month'], $data_team['year']);
@@ -271,6 +269,52 @@ class IncHdController extends Controller
             // Rollback การทำธุรกรรมถ้ามีข้อผิดพลาด
             DB::rollBack();
             return response()->json(['msg' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function update(Request $request){
+//        dd($request->all());
+        $IncHdId = $request->inc_id;
+
+        // เช็คว่ามี ID หรือไม่
+        if (!$IncHdId){
+            return response()->json([
+                'msg' => 'ไม่สามารถอัพเดทข้อมูลได้ กรุณากดที่เมนู "QC สินค้า ประจำปี" แล้วลองใหม่อีกครั้ง หรือติดต่อแผนก IT'
+            ],400);
+        }
+
+        DB::beginTransaction();
+        try {
+            $updateIncHd = inc_hd::find($IncHdId);
+            $updateIncHd->status = 'active';
+            $updateIncHd->totalqcqty = $request->data_team['total_empqc_teams'];
+            $updateIncHd->totaltimepermonth = $request->data_team['average_time_HM'];
+            $updateIncHd->totaltimeperday = $request->data_team['average_time_HD'];
+            $updateIncHd->gradeteam = $request->data_team['average_grade'];
+            $updateIncHd->payamntteam = $request->data_team['total_receiveds'];
+            $updateIncHd->updatebycode = auth()->user()->authcode;
+            $updateIncHd->updated_at = Carbon::now();
+            $updateIncHd->save();
+
+
+            $RemoveIncDt = inc_dt::where('inc_id', $IncHdId)->get();
+            foreach ($RemoveIncDt as $incDt) {
+                $incDt->delete();
+            }
+            $RemoveInc_detail = inc_detail::where('inc_id', $IncHdId)->get();
+            foreach ($RemoveInc_detail as $incDetail) {
+                $incDetail->delete();
+            }
+            $InsertIncDt = App::make('App\Http\Controllers\IncDtController')->store($request->datas, $IncHdId, $updateIncHd->monthkey, $updateIncHd->yearkey);
+            DB::commit();
+            return response()->json([
+                'msg' => 'อัพเดทข้อมูลสำเร็จ กดตกลงเพื่อดำเนินการต่อ'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'msg' => 'เกิดข้อผิดพลาดในการอัพเดทข้อมูล: ' . $e->getMessage()
+            ], 500);
         }
     }
 

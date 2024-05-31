@@ -118,6 +118,7 @@ class IncHdAfterSaveContoller extends Controller
 
 
         $data_teams = [
+            'status' => $old_data_teams->status,
             'average_grade' => $old_data_teams->gradeteam,
             'average_time_HD' => $old_data_teams->totaltimeperday,
             'average_time_HM' => $old_data_teams->totaltimepermonth,
@@ -140,10 +141,11 @@ class IncHdAfterSaveContoller extends Controller
             return response()->json([
                 'amount_qc_users' => $amount_qc_users,
                 'data_teams' => $data_teams,
+                'inc_id' => $old_data_teams->id,
                 'msg' => 'heloworld'
             ], 200);
         } else {
-            return response()->json(['amount_qc_users' => null, 'data_teams' => null,'msg' => 'heloworld'], 400);
+            return response()->json(['amount_qc_users' => null, 'data_teams' => null,'msg' => 'เกิดข้อผิดพลาด (Inc_dt or Detail not found)'], 400);
         }
     }
 }

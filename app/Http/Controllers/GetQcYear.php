@@ -32,7 +32,10 @@ class GetQcYear extends Controller
                         $result->status = $getIncHd->status;
                         $result->user_count = $getIncHd->numofemp;
                         $result->job_count = $getIncHd->totalqcqty;
-                        $result->updated_at = $getIncHd->updated_at;
+                        $result->caldate = $getIncHd->caldate;
+                        $result->confirmdate = $getIncHd->confirmdate;
+                        $result->confirmapprove = $getIncHd->confirmapprove;
+                        $result->confirmpaydate = $getIncHd->confirmpaydate;
                         $matched = true;
                         break;
                     }

@@ -8,9 +8,39 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller{
+
+
+    public function signup(SignupRequest $request)
+    {
+        $data = $request->validated();
+
+        /** @var \App\Models\User $user */
+        $user = new User();
+        $user->emp_role = 'HR';
+        $user->authcode = $data['name'];
+        $user->name = $data['name'];
+        $user->emp_status = 'active';
+        $user->incentive = 'incentive';
+        $user->email = $data['email'];
+        $user->password = bcrypt($data['password']);
+        $user->save();
+        $token = $user->createToken('main')->plainTextToken;
+
+        if ($user){
+            if ($token){
+                return response()->json(['msg' => 'สร้าง user สำเร็จ'],200);
+            }
+        }else{
+            return response()->json(['msg'=>'สร้าง user ไม่สำเร็จ'],400);
+        }
+    }
+
+
+
     public function login(LoginRequest $request){
         $credentials = $request->validated();
         $remember = $credentials['remember'] ?? false;

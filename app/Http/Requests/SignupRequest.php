@@ -25,33 +25,13 @@ class SignupRequest extends FormRequest
     public function rules()
     {
         return [
-            'emp_no' => 'required',
-            'emp_name' => 'required',
-            'emp_role' => 'required',
-            'name' => 'required|string|unique:users,name',
+            'name' => 'required|string',
+            'email' => 'required|email|string|unique:users,email',
             'password' => [
                 'required',
                 'confirmed',
-                Password::min(4)
-            ],
-            'emp_status' => 'required'
-        ];
-    }
-
-    public function messages()
-    {
-        return [
-            'emp_no.required' => 'กรุณากรอกหมายเลขพนักงาน',
-            'emp_name.required' => 'กรุณากรอกชื่อพนักงาน',
-            'emp_role.required' => 'กรุณาเลือกบทบาทของพนักงาน',
-            'name.required' => 'กรุณากรอกชื่อผู้ใช้',
-            'name.unique' => 'ชื่อผู้ใช้นี้มีผู้ใช้งานแล้ว',
-            'password.required' => 'กรุณากรอกรหัสผ่าน',
-            'password.confirmed' => 'รหัสผ่านที่ยืนยันไม่ตรงกัน',
-            'password.min' => 'รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร',
-            'emp_status.required' => 'กรุณาเลือกสถานะของพนักงาน',
+                Password::min(8)->mixedCase()->numbers()->symbols()
+            ]
         ];
     }
 }
-
-

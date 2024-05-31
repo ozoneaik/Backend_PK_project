@@ -19,18 +19,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        //users
-        \App\Models\User::factory()->create([
-            'emp_no' => '1',
-            'emp_name' => 'phuwadech',
-            'email' => '502365@gmail.com',
-            'emp_role' => 'admin',
-            'name' => 'ภูวเดช พาณิชยโสภา',
-            'emp_status' => 'active',
-            'authcode' => 'C001',
-            'incentive' => 'incentive',
-            'password' => Hash::make('1111'),
-        ]);
+
 
         //qc_level
         $qcLevels = [

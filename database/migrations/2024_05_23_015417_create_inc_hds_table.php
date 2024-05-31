@@ -28,7 +28,9 @@ return new class extends Migration
             $table->double('payamntteam');
             $table->string('createbycode');
             $table->string('updatebycode');
+            $table->dateTime('caldate')->nullable();
             $table->dateTime('confirmdate')->nullable();
+            $table->dateTime('confirmapprove')->nullable();
             $table->dateTime('confirmpaydate')->nullable();
             $table->timestamps();
         });
