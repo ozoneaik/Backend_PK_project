@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 
 use App\Http\Controllers\GetQcYear;
 use App\Http\Controllers\IncHdController;
+use App\Http\Controllers\ManageUserController;
 use App\Http\Controllers\QcProdController;
 use App\Http\Controllers\QcRateController;
 use App\Http\Controllers\QcTimeController;
@@ -58,7 +59,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/qc_month/hr/confirmpaydate',[ApproveIncHdController::class,'ConfirmPayDate']);
 
         //User manage
-        Route::get('/user-list',[\App\Http\Controllers\ManageUserController::class,'userList']);
+        Route::get('/user-list',[ManageUserController::class,'userList']);
+        Route::post('/user-store',[ManageUserController::class,'userStore']);
+        Route::post('/user-update',[ManageUserController::class,'userUpdate']);
     });
 
     //Products
