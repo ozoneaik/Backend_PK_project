@@ -19,7 +19,7 @@ class CreateUserSeeder extends Seeder
 
         //users
         \App\Models\User::factory()->create([
-            'email' => '502365@gmail.com',
+            'email' => 'C001@gmail.com',
             'emp_role' => 'QC',
             'name' => 'ภูวเดช พาณิชยโสภา',
             'emp_status' => 'active',
@@ -28,7 +28,7 @@ class CreateUserSeeder extends Seeder
             'password' => Hash::make('1111'),
         ]);
         \App\Models\User::factory()->create([
-            'email' => '502366@gmail.com',
+            'email' => 'C002@gmail.com',
             'emp_role' => 'HR',
             'name' => 'ว่าที่ HR คนใหม่',
             'emp_status' => 'active',

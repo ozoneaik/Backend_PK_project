@@ -44,7 +44,7 @@ class SignupRequest extends FormRequest
         return [
             'email.required' => 'จำเป็นต้องระบุอีเมล',
             'email.email' => 'อีเมลต้องเป็นที่อยู่อีเมลที่ถูกต้อง',
-            'email.unique' => 'อีเมลนี้มีผู้ใช้แล้ว',
+            'email.unique' => 'มีผู้ใช้นี้แล้ว',
             'name.required' => 'จำเป็นต้องระบุชื่อ',
             'password.required' => 'จำเป็นต้องระบุรหัสผ่าน',
             'password.min' => 'รหัสผ่านต้องมีอย่างน้อย 4 ตัวอักษร',
