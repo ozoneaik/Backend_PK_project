@@ -44,6 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::group(['prefix' => 'manage'], function () {
             // จัดการระดับการ QC ใน Table QcTime
             Route::get('/qc_time', [QcTimeController::class, 'index']);
+            Route::post('/qc_time_update', [QcTimeController::class, 'update']);
             // จัดการการคำนวณเกรด ใน Table QcRate
             Route::get('/calculate_grade', [QcRateController::class,'getRate']);
         });

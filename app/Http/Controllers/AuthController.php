@@ -45,11 +45,6 @@ class AuthController extends Controller{
         $credentials = $request->validated();
         $remember = $credentials['remember'] ?? false;
         unset($credentials['remember']);
-//        if (!Auth::attempt($credentials, $remember)) {
-//            return response([
-//                'error' => 'The Provided credentials are not correct'
-//            ], 422);
-//        }
         // ตรวจสอบข้อมูลผู้ใช้จากฐานข้อมูลโดยใช้ Eloquent หรือ Query Builder
         $user = User::where('email', $credentials['email'])->first();
         if (!$user || !Hash::check($credentials['password'], $user->password)) {

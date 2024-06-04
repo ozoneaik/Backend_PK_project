@@ -31,7 +31,17 @@ class IncHdController extends Controller
             return App::make('App\Http\Controllers\IncHdAfterSaveContoller')->getDataLocal($year, $month,$status);
         }
         $startOfMonth = "$year-$month-01";
-        $workday = 22;
+
+
+        //ดึงข้อมูลนับจำนวนวันของเดือนนั้นๆ
+        $monthPattern = str_pad($month, 2, '0', STR_PAD_LEFT);
+        $datePattern = "{$year}-{$monthPattern}-%";
+        $workdayQL = QcMain::where('datekey', 'LIKE', $datePattern)
+            ->select(DB::raw('COUNT(DISTINCT DATE_FORMAT(datekey, "%Y-%m-%d")) AS day'))
+            ->first();
+        $workday = $workdayQL['day'];
+
+
         //ดึงข้อมูลจาก times
         $times = qc_time::orderBy('ti_id','asc')->get();
         $timeValues = $times->pluck('time')->toArray();
@@ -196,6 +206,8 @@ class IncHdController extends Controller
             'average_time_HM' => $average_time_HM,
             'average_grade' => $average_grade,
 
+            'workday' => $workday,
+
             'totalVeryEasy' => $totalVeryEasy,
             'totalEasy' => $totalEasy,
             'totalMiddling' => $totalMiddling,
@@ -230,12 +242,20 @@ class IncHdController extends Controller
         DB::beginTransaction();
 
         try {
+
+            $monthPattern = str_pad($data_team['month'], 2, '0', STR_PAD_LEFT);
+            $datePattern = "{$data_team['year']}-{$monthPattern}-%";
+            $workdayQL = QcMain::where('datekey', 'LIKE', $datePattern)
+                ->select(DB::raw('COUNT(DISTINCT DATE_FORMAT(datekey, "%Y-%m-%d")) AS day'))
+                ->first();
+            $workday = $workdayQL['day'];
+
             // Insert INTO inc_hds (ทีม)
             $IncHd = new inc_hd();
             $IncHd->monthkey = $data_team['month'];
             $IncHd->yearkey = $data_team['year'];
             $IncHd->paydate = $data_team['month'] + 1;
-            $IncHd->workday = 22;
+            $IncHd->workday = $workday;
             $IncHd->status = $data_team['status'];
             $IncHd->numofemp = count($datas);
             $IncHd->totalqcqty = $data_team['total_empqc_teams'];

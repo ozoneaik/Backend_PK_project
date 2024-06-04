@@ -97,6 +97,7 @@ class IncHdAfterSaveContoller extends Controller
                 'total_person_received' => $IncDt->payamnt-$total_received_team,
                 'total_received' => $IncDt->payamnt,
                 'payremark' => $IncDt->payremark,
+
             ];
 
             $totalVeryEasy += $levels->level_very_easy;
@@ -132,6 +133,8 @@ class IncHdAfterSaveContoller extends Controller
             'totalPersonReceived' => $total_person_received_teams,
             'total_empqc_teams' => $old_data_teams->totalqcqty,
             'total_received_team' => $total_received_team,
+
+            'workday' => $old_data_teams->workday,
 
             'total_receiveds' => doubleval($old_data_teams->payamntteam)
         ];
