@@ -47,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/qc_time_update', [QcTimeController::class, 'update']);
             // จัดการการคำนวณเกรด ใน Table QcRate
             Route::get('/calculate_grade', [QcRateController::class,'getRate']);
+            Route::post('/qc_rate_update', [QcRateController::class, 'update']);
         });
 
 
