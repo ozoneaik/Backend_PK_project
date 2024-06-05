@@ -62,8 +62,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
         //User manage
         Route::get('/user-list',[ManageUserController::class,'userList']);
+        Route::get('/user-detail/{id}',[ManageUserController::class,'userDetail']);
         Route::post('/user-store',[ManageUserController::class,'userStore']);
-        Route::post('/user-update',[ManageUserController::class,'userUpdate']);
+        Route::post('/user-update/{id}',[ManageUserController::class,'userUpdate']);
+        Route::post('/user-delete/{id}',[ManageUserController::class,'userDelete']);
     });
 
     //Products
