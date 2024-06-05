@@ -136,7 +136,9 @@ class IncHdAfterSaveContoller extends Controller
 
             'workday' => $old_data_teams->workday,
 
-            'total_receiveds' => doubleval($old_data_teams->payamntteam)
+            'total_receiveds' => doubleval($old_data_teams->payamntteam),
+
+            'createbycode' => $old_data_teams->createbycode,
         ];
 
 
