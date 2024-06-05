@@ -19,4 +19,6 @@ Route::get('/', function () {
 });
 
 
-Route::get('/users', [Controller::class,'index'])->name('index');
+Route::get('/test', function () {
+    return response()->json(['test web.php']);
+});
