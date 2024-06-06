@@ -31,6 +31,8 @@ return new class extends Migration
             $table->dateTime('caldate')->nullable();
             $table->dateTime('confirmdate')->nullable();
             $table->dateTime('confirmapprove')->nullable();
+            $table->string('confirmapprovebycode')->nullable();
+            $table->string('confirmpaydatebycode')->nullable();
             $table->dateTime('confirmpaydate')->nullable();
             $table->timestamps();
         });

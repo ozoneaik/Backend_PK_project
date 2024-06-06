@@ -314,6 +314,10 @@ class IncHdController extends Controller
             $updateIncHd->payamntteam = $request->data_team['total_receiveds'];
             $updateIncHd->updatebycode = auth()->user()->authcode;
             $updateIncHd->updated_at = Carbon::now();
+            $updateIncHd->caldate = Carbon::now();
+            $updateIncHd->confirmdate = null;
+            $updateIncHd->confirmapprove = null;
+            $updateIncHd->confirmpaydate = null;
             $updateIncHd->save();
 
 

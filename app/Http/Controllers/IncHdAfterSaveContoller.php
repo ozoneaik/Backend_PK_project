@@ -139,6 +139,9 @@ class IncHdAfterSaveContoller extends Controller
             'total_receiveds' => doubleval($old_data_teams->payamntteam),
 
             'createbycode' => $old_data_teams->createbycode,
+
+            'confirmapprovebycode' => $old_data_teams->confirmapprovebycode,
+            'confirmpaydatebycode' => $old_data_teams->confirmpaydatebycode,
         ];
 
 
