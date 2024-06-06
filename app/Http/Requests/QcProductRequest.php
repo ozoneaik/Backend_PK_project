@@ -24,7 +24,7 @@ class QcProductRequest extends FormRequest
     public function rules()
     {
         return [
-            'pid' => 'required',
+            'pid' => 'required|unique:qc_prods,pid',
             'le_id' => 'required',
             'pname' => 'required',
             'timeperpcs' => 'required',
@@ -34,6 +34,7 @@ class QcProductRequest extends FormRequest
     public function messages()
     {
         return [
+            'pid.unique' => 'มีรหัสสินค้านี้ในฐานข้อมูลอยู่แล้ว',
             'pid.required' => 'กรุณากรอกรหัสสินค้า',
             'le_id.required' => 'กรุณากรอกระดับความยาก',
             'pname.required' => 'กรุณากรอกชื่อสินค้า',

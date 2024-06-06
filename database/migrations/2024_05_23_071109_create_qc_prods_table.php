@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('pid');
             $table->string('pname');
             $table->integer('le_id');
-            $table->string('timeperpcs');
+            $table->time('timeperpcs');
             $table->string('createbycode');
             $table->string('updatebycode');
             $table->timestamps();

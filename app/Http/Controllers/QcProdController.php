@@ -27,8 +27,6 @@ class QcProdController extends Controller
 
     public function store(QcProductRequest $request)
     {
-
-
         $difficultyLevels = [
             'Very Easy' => 1,
             'Easy' => 2,
@@ -45,8 +43,8 @@ class QcProdController extends Controller
         $products->pname = $request->pname;
         $products->le_id = $le_id;
         $products->timeperpcs = $time;
-        $products->createbycode = Auth::user()->emp_no;
-        $products->updatebycode = Auth::user()->emp_no;
+        $products->createbycode = Auth::user()->authcode;
+        $products->updatebycode = Auth::user()->authcode;
         $products->save();
 
         return response()->json([
