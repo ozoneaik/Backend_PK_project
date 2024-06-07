@@ -290,6 +290,9 @@ class IncHdController extends Controller
         } catch (\Exception $e) {
             // Rollback การทำธุรกรรมถ้ามีข้อผิดพลาด
             DB::rollBack();
+            if (strpos($e->getMessage(), 'invalid input syntax for type integer') !== false && strpos($e->getMessage(), 'skucode') !== false) {
+                return response()->json(['msg' => 'ไม่พบชื่อสินค้าจากรหัส skucode ในฐานข้อมูล' . PHP_EOL . 'รายละเอียดข้อผิดพลาด' . $e->getMessage()], 500);
+            }
             return response()->json(['msg' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()], 500);
         }
     }

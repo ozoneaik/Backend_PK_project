@@ -29,4 +29,11 @@ class LoginRequest extends FormRequest
             'remember' => 'boolean'
         ];
     }
+
+    public function messages(){
+        return [
+            'email.required' => 'กรุณากรอกชื่อผู้ใช้งานระบบ',
+            'password.required' => 'กรุณากรอกรหัสผ่าน',
+        ];
+    }
 }

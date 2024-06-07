@@ -49,7 +49,8 @@ class AuthController extends Controller{
         $user = User::where('email', $credentials['email'])->first();
         if (!$user || !Hash::check($credentials['password'], $user->password)) {
             return response([
-                'error' => 'The Provided credentials are not correct'
+                'error' => 'The Provided credentials are not correct',
+                'message' => 'ผู้ใช้งานระบบหรือรหัสผ่านไม่ถูกต้อง'
             ], 422);
         }
 //      $user = Auth::user();
