@@ -58,9 +58,6 @@ class IncDetailController extends Controller
             $IncDetail->skucode = $result->skucode;
             $IncDetail->skuname = $result->pname;
             $IncDetail->skuqty = $result->skuqty;
-//            if (empty($result->le_id)) {
-//                continue;
-//            }
             $ConvertLevelId = substr($result->levelid, 3);
             $IncDetail->le_id = $ConvertLevelId;
             $IncDetail->le_name = $result->le_name;

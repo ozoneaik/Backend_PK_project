@@ -72,6 +72,8 @@ class IncHdController extends Controller
             ->get();
 
 
+
+
         $total_empqc_teams = 0;
         $total_HD = 0; //HD
         $total_HM = 0; //HM
