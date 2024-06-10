@@ -29,7 +29,7 @@ class GetQcYear extends Controller
                 DB::raw('COUNT(DISTINCT ld.empqc) AS user_count'),
                 DB::raw('COUNT(DISTINCT DATE_FORMAT(ld.datekey, "%Y-%m-%d")) AS day')
             )
-            ->where('ld.datekey', 'LIKE', '2024-%-%')
+            ->where('ld.datekey', 'LIKE', "$year-%-%")
             ->groupBy(DB::raw("DATE_FORMAT(ld.datekey, '%Y-%m')"))
             ->get();
 
