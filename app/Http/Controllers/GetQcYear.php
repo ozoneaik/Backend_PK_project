@@ -10,16 +10,29 @@ class GetQcYear extends Controller
     //ดึงจำนวนงาน QC ในปีนั้นๆแต่ละเดือน
     public function getQcYear($year){
 
-        $results = DB::connection('mysql_main_qc')->table('qc_log_data')
+//        $results = DB::connection('mysql_main_qc')->table('qc_log_data')
+//            ->select(
+//                DB::raw("DATE_FORMAT(datekey, '%Y-%m') AS year"),
+//                DB::raw('COUNT(job_id) as job_count'),
+//                DB::raw('COUNT(DISTINCT empqc) AS user_count'),
+//                DB::raw('COUNT(DISTINCT DATE_FORMAT(datekey, "%Y-%m-%d")) AS day')
+//            )
+//            ->where('datekey', 'LIKE', "$year-%-%")
+//            ->groupBy(DB::raw("DATE_FORMAT(datekey, '%Y-%m')"))
+//            ->get();
+
+        $results = DB::connection('mysql_main_qc')->table('qc_log_data AS ld')
+            ->leftJoin('qc_prod AS p', 'ld.skucode', '=', 'p.pid')
             ->select(
-                DB::raw("DATE_FORMAT(datekey, '%Y-%m') AS year"),
-                DB::raw('COUNT(job_id) as job_count'),
-                DB::raw('COUNT(DISTINCT empqc) AS user_count'),
-                DB::raw('COUNT(DISTINCT DATE_FORMAT(datekey, "%Y-%m-%d")) AS day')
+                DB::raw("DATE_FORMAT(ld.datekey, '%Y-%m') AS year"),
+                DB::raw('COUNT(ld.job_id) AS job_count'),
+                DB::raw('COUNT(DISTINCT ld.empqc) AS user_count'),
+                DB::raw('COUNT(DISTINCT DATE_FORMAT(ld.datekey, "%Y-%m-%d")) AS day')
             )
-            ->where('datekey', 'LIKE', "$year-%-%")
-            ->groupBy(DB::raw("DATE_FORMAT(datekey, '%Y-%m')"))
+            ->where('ld.datekey', 'LIKE', '2024-%-%')
+            ->groupBy(DB::raw("DATE_FORMAT(ld.datekey, '%Y-%m')"))
             ->get();
+
 
 
         $getIncHds = inc_hd::where('yearkey', $year)->get();
