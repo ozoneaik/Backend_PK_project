@@ -74,6 +74,7 @@ class IncHdController extends Controller
 
 
 
+
         $total_empqc_teams = 0;
         $total_HD = 0; //HD
         $total_HM = 0; //HM
@@ -137,12 +138,12 @@ class IncHdController extends Controller
             }
 
             // หาผลรวมยอดรับบุคคลของแต่ละคน
-            $user->total_person_received = round(
+            $user->total_person_received = floor(
                 ($user->level_easy * $user->rateEasy) +
                 ($user->level_very_easy * $user->rateVeryEasy) +
                 ($user->level_middling * $user->rateMiddling) +
                 ($user->level_hard * $user->rateHard) +
-                ($user->level_very_hard * $user->rateVeryHard), 2
+                ($user->level_very_hard * $user->rateVeryHard)
             );
 
             //Teams
@@ -201,6 +202,7 @@ class IncHdController extends Controller
             }
             $total_receiveds += $user->total_received;
         }
+
 
 
         $data_teams = [

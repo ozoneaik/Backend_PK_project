@@ -41,6 +41,7 @@ class IncHdAfterSaveContoller extends Controller
                 'timeperday'
             )
             ->get();
+
         $amount_qc_users = [];
         $totalVeryEasy = 0;
         $totalEasy = 0;
@@ -64,7 +65,7 @@ class IncHdAfterSaveContoller extends Controller
                 break;
         }
 
-        foreach ($IncDts as $IncDt) {
+        foreach ($IncDts as $index=>$IncDt) {
             $levels = DB::table('inc_details')
                 ->select(
                     DB::raw('SUM(CASE WHEN le_id = 1 THEN skuqty ELSE 0 END) AS level_very_easy'),
@@ -97,8 +98,8 @@ class IncHdAfterSaveContoller extends Controller
                 'total_person_received' => $IncDt->payamnt-$total_received_team,
                 'total_received' => $IncDt->payamnt,
                 'payremark' => $IncDt->payremark,
-
             ];
+//            dd($amount_qc_users[$index]['total_person_received']);
 
             $totalVeryEasy += $levels->level_very_easy;
             $totalEasy += $levels->level_easy;
@@ -106,15 +107,18 @@ class IncHdAfterSaveContoller extends Controller
             $totalHard += $levels->level_hard;
             $totalVeryHard += $levels->level_very_hard;
 
-            $total_person_received = round(
+            $total_person_received = floor(
                 ($levels->level_very_easy * $IncDt->rateveryeasy) +
                 ($levels->level_easy * $IncDt->rateeasy) +
                 ($levels->level_middling * $IncDt->ratemiddling) +
                 ($levels->level_hard * $IncDt->ratehard) +
-                ($levels->level_very_hard * $IncDt->rateveryhard),2
+                ($levels->level_very_hard * $IncDt->rateveryhard)
             );
-            $total_person_received_teams += $total_person_received;
+//            $total_person_received_teams += $total_person_received;
+            $total_person_received_teams += $amount_qc_users[$index]['total_person_received'];
         }
+
+
 
 
 

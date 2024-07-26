@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\inc_dt;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 
 class IncDtController extends Controller
