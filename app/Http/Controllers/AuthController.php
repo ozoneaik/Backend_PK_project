@@ -77,4 +77,12 @@ class AuthController extends Controller{
     {
         return $request->user();
     }
+
+    public function getUser($id){
+        $username = User::where('authcode', $id)->first();
+        $username = $username->name;
+        return response()->json([
+            'username' => $username
+        ]);
+    }
 }
