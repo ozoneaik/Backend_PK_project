@@ -9,67 +9,45 @@ class GetQcYear extends Controller
 {
     //ดึงจำนวนงาน QC ในปีนั้นๆแต่ละเดือน
     public function getQcYear($year){
+        $currentMonth = date('n'); // เดือนปัจจุบัน (1-12)
 
-//        $results = DB::connection('mysql_main_qc')->table('qc_log_data')
-//            ->select(
-//                DB::raw("DATE_FORMAT(datekey, '%Y-%m') AS year"),
-//                DB::raw('COUNT(job_id) as job_count'),
-//                DB::raw('COUNT(DISTINCT empqc) AS user_count'),
-//                DB::raw('COUNT(DISTINCT DATE_FORMAT(datekey, "%Y-%m-%d")) AS day')
-//            )
-//            ->where('datekey', 'LIKE', "$year-%-%")
-//            ->groupBy(DB::raw("DATE_FORMAT(datekey, '%Y-%m')"))
-//            ->get();
+        $getIncHds = inc_hd::where('yearkey', $year)->orderBy('monthkey', 'asc')->get();
 
-        $results = DB::connection('mysql_main_qc')->table('qc_log_data AS ld')
-            ->leftJoin('qc_prod AS p', 'ld.skucode', '=', 'p.pid')
-            ->select(
-                DB::raw("DATE_FORMAT(ld.datekey, '%Y-%m') AS year"),
-                DB::raw('COUNT(ld.job_id) AS job_count'),
-                DB::raw('COUNT(DISTINCT ld.empqc) AS user_count'),
-                DB::raw('COUNT(DISTINCT DATE_FORMAT(ld.datekey, "%Y-%m-%d")) AS day')
-            )
-            ->where('ld.datekey', 'LIKE', "$year-%-%")
-            ->groupBy(DB::raw("DATE_FORMAT(ld.datekey, '%Y-%m')"))
-            ->get();
-
-
-
-        $getIncHds = inc_hd::where('yearkey', $year)->get();
-        if (count($getIncHds) > 0) {
-            foreach ($results as $result) {
-                $matched = false;
-                foreach ($getIncHds as $getIncHd) {
-                    $y = sprintf("%d-%02d", $getIncHd->yearkey, $getIncHd->monthkey);
-                    if ($result->year == $y) {
-                        $result->status = $getIncHd->status;
-                        $result->user_count = $getIncHd->numofemp;
-                        $result->job_count = $getIncHd->totalqcqty;
-                        $result->caldate = $getIncHd->caldate;
-                        $result->confirmdate = $getIncHd->confirmdate;
-                        $result->confirmapprove = $getIncHd->confirmapprove;
-                        $result->confirmpaydate = $getIncHd->confirmpaydate;
-                        $matched = true;
-                        break;
-                    }
-                }
-                if (!$matched) {
-                    $result->status = '-';
-                    $result->updated_at = null;
-                }
-            }
-        } else {
-            foreach ($results as $result) {
-                $result->status = '-';
-                $result->updated_at = null;
+        $allMonths = [];
+        for ($month = 1; $month <= $currentMonth; $month++) {
+            $monthData = $getIncHds->firstWhere('monthkey', $month);
+            if ($monthData) {
+                $allMonths[] = $monthData;
+            } else {
+                $allMonths[] = [
+                    'yearkey' => $year,
+                    'monthkey' => $month,
+                    'paydate' => null,
+                    'workday' => null,
+                    'status' => '-',
+                    'numofemp' => null,
+                    'totalqcqty' => null,
+                    'totaltimepermonth' => null,
+                    'totaltimeperday' => null,
+                    'gradeteam' => null,
+                    'payamntteam' => null,
+                    'createbycode' => null,
+                    'updatebycode' => null,
+                    'caldate' => null,
+                    'confirmdate' => null,
+                    'confirmapprove' => null,
+                    'confirmapprovebycode' => null,
+                    'confirmpaydatebycode' => null,
+                    'confirmpaydate' => null,
+                    'created_at' => null,
+                    'updated_at' => null
+                ];
             }
         }
 
-        if (count($results) > 0){
-            return response()->json(['results' => $results,'msg' => 'ตรวจพบรายสินค้าประจำปี '.$year], 200);
-
-        }else{
-            return response()->json(['results' => null,'msg' => 'ไม่พบรายการสินค้าประจำปี '.$year],400);
-        }
+        return response()->json([
+            'message' => 'ดึงข้อมูลสำเร็จ',
+            'list' => $allMonths,
+        ]);
     }
 }

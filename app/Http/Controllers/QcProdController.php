@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\QcProductRequest;
 use App\Models\qc_prod;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -13,10 +14,11 @@ class QcProdController extends Controller
     public function index()
     {
 
-        $products = DB::connection('mysql_main_qc')
-            ->table('qc_prod')
-            ->join('qc_level', 'qc_prod.levelid', '=', 'qc_level.levelid')
-            ->get();
+//        $products = DB::connection('mysql_main_qc')
+//            ->table('qc_prod')
+//            ->join('qc_level', 'qc_prod.levelid', '=', 'qc_level.levelid')
+//            ->get();
+        $products = qc_prod::all();
         if (count($products) > 0){
             return response()->json(['products' => $products,'msg' => 'ตรวจพบรายการสินค้าในฐานข้อมุล'], 200);
         }else{
@@ -27,24 +29,15 @@ class QcProdController extends Controller
 
     public function store(QcProductRequest $request)
     {
-        $difficultyLevels = [
-            'Very Easy' => 1,
-            'Easy' => 2,
-            'Middling' => 3,
-            'Hard' => 4,
-            'Very Hard' => 5,
-        ];
-
-        $le_id = $difficultyLevels[$request->le_id] ?? 6;
-
-        $time = (string)$request->timeperpcs;
+//        dd($request->all());
+        $timeperpcs = (string)$request->timeperpcs;
         $products = new qc_prod();
         $products->pid = $request->pid;
         $products->pname = $request->pname;
-        $products->le_id = $le_id;
-        $products->timeperpcs = $time;
-        $products->createbycode = Auth::user()->authcode;
-        $products->updatebycode = Auth::user()->authcode;
+        $products->levelid = $request->levelid;
+        $products->timeperpcs = $timeperpcs;
+        $products->createdate = Carbon::now();
+        $products->updatedate = Carbon::now();
         $products->save();
 
         return response()->json([
@@ -56,14 +49,23 @@ class QcProdController extends Controller
     {
         $product = qc_prod::findOrFail($id);
         if ($product) {
-            return response()->json(['product' => $product], 200);
+            return response()->json([
+                'product' => $product
+            ], 200);
         }
-        return response()->json([], 400);
+        return response()->json([
+            'message' => 'ไม่พบรายการสินค้าที่ต้องการแก้ไข'
+        ], 400);
     }
 
     public function update(QcProductRequest $request, $id)
     {
 
+        $product = qc_prod::find($id);
+        $product->levelid = $request->levelid;
+        $product->timeperpcs = $request->timeperpcs;
+        $product->updatedate = Carbon::now();
+        $product->save();
         return response()->json(['hello', $id]);
     }
 }

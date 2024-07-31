@@ -25,7 +25,7 @@ class QcProductRequest extends FormRequest
     {
         return [
             'pid' => 'required|unique:qc_prods,pid',
-            'le_id' => 'required',
+            'levelid' => 'required',
             'pname' => 'required',
             'timeperpcs' => 'required',
         ];
@@ -36,7 +36,7 @@ class QcProductRequest extends FormRequest
         return [
             'pid.unique' => 'มีรหัสสินค้านี้ในฐานข้อมูลอยู่แล้ว',
             'pid.required' => 'กรุณากรอกรหัสสินค้า',
-            'le_id.required' => 'กรุณากรอกระดับความยาก',
+            'levelid.required' => 'กรุณากรอกระดับความยาก',
             'pname.required' => 'กรุณากรอกชื่อสินค้า',
             'timeperpcs.required' => 'กรุณากรอกระยะเวลามาตรฐาน (HH:MM:SS)',
         ];
