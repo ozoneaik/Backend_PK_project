@@ -11,64 +11,33 @@ class QcWorkdayController extends Controller
     //
 
     public function index(){
-        $workdays = qc_workday::orderByRaw("CONCAT(wo_year, '/', wo_month) DESC")->get();
-        if ($workdays){
-            return response()->json([
-                'workdays' => $workdays,
-            ],200);
-        }else{
-            return response()->json([],400);
-        }
+        $workdays = qc_workday::all();
+        return response()->json([
+            'workdays' => $workdays,
+        ]);
     }
-
-    public function getYears(){
-        $workdays = qc_workday::select('wo_year')->distinct()->get();
-        return response()->json(
-            $workdays
-        );
-    }
-
 
     public function store(Request $request)
     {
-        $request->validate([
-            'wo_year' => ['required'],
-            'wo_month' => ['required'],
-            'workday' => ['required'],
-        ],[
-            'wo_year.required' => 'กรุณากรอกปี',
-            'wo_month.required' => 'กรุณากรอกเดือน',
-            'workday.required' => 'กรุณากรอกวันทำงาน ( WorkDay )',
-        ]);
-
-        $results = DB::table('qc_workdays')
-            ->where('wo_year', 'LIKE', $request->wo_year)
-            ->where('wo_month', 'LIKE', $request->wo_month)
-            ->get();
-
-        if (!$results->isEmpty()){
-            return response()->json([
-                'status' => false,
-                'message' => 'เคยกรอกข้อมูลนี้ไปแล้ว'
-            ],400);
-        }else{
-            $workday = new qc_workday();
-            $workday->wo_year = $request->input('wo_year');
-            $workday->wo_month = $request->input('wo_month');
-            $workday->workday = $request->input('workday');
-            $workday->save();
-
-            if ($workday){
+        $workday = $request->all();
+        $year_month = $workday['wo_year'] . '-' . $workday['wo_month'];
+        $workdays = qc_workday::all();
+        foreach ($workdays as $check) {
+            $checkBase = $check->wo_year . '-' . $check->wo_month;
+            if ($year_month == $checkBase) {
                 return response()->json([
-                    'status' => true,
-                    'message' => 'บันทึกข้อมูลสำเร็จ'
-                ],200);
-            }else{
-                return response()->json([
-                    'status' => false,
-                    'message' => 'บันทึกข้อมูลไม่สำเร็จ'
+                    'message' => 'ขออภัยคุณเพิ่มจำนวนวันของ '.$year_month. ' แล้ว'
                 ],400);
             }
         }
+
+        $insert = new qc_workday();
+        $insert->wo_year = $workday['wo_year'];
+        $insert->wo_month = $workday['wo_month'];
+        $insert->workday = $workday['workday'];
+        $insert->save();
+        return response()->json([
+            'message' => 'บันทึกข้อมูลเสร็จสิ้น'
+        ],200);
     }
 }

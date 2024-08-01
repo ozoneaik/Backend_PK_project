@@ -40,6 +40,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/list-year',[AddYearController::class,'ListYear']);
 
 
+        //Add WorkDay
+        Route::get('/workday/list',[QCWorkdayController::class,'index']);
+        Route::post('/workday/store',[QCWorkdayController::class,'store']);
+
         Route::get('/qc_year/{year}', [GetQcYear::class , 'getQcYear']);
         Route::get('/qc_month/{year}/{month}/{status}', [IncHdController::class, 'qc_month']);
         Route::group(['prefix' => 'manage'], function () {
@@ -85,6 +89,8 @@ Route::post('/signup', [AuthController::class, 'signup']);
 Route::get('test',function (){
     return response()->json(['test from api.php']);
 });
+
+
 
 
 
