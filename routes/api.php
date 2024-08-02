@@ -43,6 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
         //Add WorkDay
         Route::get('/workday/list',[QCWorkdayController::class,'index']);
         Route::post('/workday/store',[QCWorkdayController::class,'store']);
+        Route::put('/workday/update',[QCWorkdayController::class,'update']);
 
         Route::get('/qc_year/{year}', [GetQcYear::class , 'getQcYear']);
         Route::get('/qc_month/{year}/{month}/{status}', [IncHdController::class, 'qc_month']);

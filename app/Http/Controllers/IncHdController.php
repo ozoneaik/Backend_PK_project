@@ -6,6 +6,7 @@ use App\Models\inc_dt;
 use App\Models\inc_hd;
 use App\Models\qc_rate;
 use App\Models\qc_time;
+use App\Models\qc_workday;
 use App\Models\QcMain;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\App;
@@ -33,13 +34,23 @@ class IncHdController extends Controller
         $startOfMonth = "$year-$month-01";
 
 
-        //ดึงข้อมูลนับจำนวนวันของเดือนนั้นๆ
-        $monthPattern = str_pad($month, 2, '0', STR_PAD_LEFT);
-        $datePattern = "{$year}-{$monthPattern}-%";
-        $workdayQL = QcMain::where('datekey', 'LIKE', $datePattern)
-            ->select(DB::raw('COUNT(DISTINCT DATE_FORMAT(datekey, "%Y-%m-%d")) AS day'))
-            ->first();
-        $workday = $workdayQL['day'];
+        //ตรวจสอบก่อนว่าได้มีการเพิ่ม day ใน ManageDay หรือยัง
+        $check_workday = qc_workday::where('wo_year', $year)->where('wo_month', $month)->first();
+        if (!$check_workday){
+            return response([
+                'message' => 'ไม่พบจำนวนวันที่ทำงาน กรุณาเพิ่มจำนวนวันในเมนู จัดการวันทำงาน'
+            ],412);
+        }else{
+            $workday = $check_workday->workday;
+        }
+//        //ดึงข้อมูลนับจำนวนวันของเดือนนั้นๆ
+//        $monthPattern = str_pad($month, 2, '0', STR_PAD_LEFT);
+//        $datePattern = "{$year}-{$monthPattern}-%";
+//        $workdayQL = QcMain::where('datekey', 'LIKE', $datePattern)
+//            ->select(DB::raw('COUNT(DISTINCT DATE_FORMAT(datekey, "%Y-%m-%d")) AS day'))
+//            ->first();
+//        $workday = $workdayQL['day'];
+
 
 
         //ดึงข้อมูลจาก times

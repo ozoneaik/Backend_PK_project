@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\qc_workday;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class QcWorkdayController extends Controller
 {
@@ -17,7 +17,7 @@ class QcWorkdayController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $workday = $request->all();
         $year_month = $workday['wo_year'] . '-' . $workday['wo_month'];
@@ -39,5 +39,26 @@ class QcWorkdayController extends Controller
         return response()->json([
             'message' => 'บันทึกข้อมูลเสร็จสิ้น'
         ],200);
+    }
+
+    public function update(Request $request){
+        try {
+            $data = $request->data;
+            foreach ($data as $key => $value) {
+                $update = qc_workday::find($value['id']);
+                $update->wo_year = $value['wo_year'];
+                $update->wo_month = $value['wo_month'];
+                $update->workday = $value['workday'];
+                $update->save();
+            }
+
+            return response()->json([
+                'message' => 'อัพเดทข้อมูลสำเร็จ'
+            ]);
+        }catch (\Exception $e){
+            return response()->json([
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 }
