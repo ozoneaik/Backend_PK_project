@@ -11,7 +11,7 @@ class LoginRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize() : bool
     {
         return true;
     }
@@ -21,7 +21,7 @@ class LoginRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
+    public function rules() : array
     {
         return [
             'email' => 'required|string',
@@ -30,7 +30,7 @@ class LoginRequest extends FormRequest
         ];
     }
 
-    public function messages(){
+    public function messages() : array{
         return [
             'email.required' => 'กรุณากรอกชื่อผู้ใช้งานระบบ',
             'password.required' => 'กรุณากรอกรหัสผ่าน',

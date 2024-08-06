@@ -21,9 +21,9 @@ class AddYearController extends Controller
         $addYear->year = $request->input('year');
         $addYear->save();
         if ($addYear->save()){
-            return response()->json(['msg' => 'บันทึกข้อมูลเสร็จสิ้น'],200);
+            return response()->json(['message' => 'บันทึกข้อมูลเสร็จสิ้น'],200);
         }else{
-            return response()->json(['msg' => 'เกิดข้อผิดพลาดในการบันทึกข้อมูล'], 500);
+            return response()->json(['message' => 'เกิดข้อผิดพลาดในการบันทึกข้อมูล'], 500);
         }
     }
 

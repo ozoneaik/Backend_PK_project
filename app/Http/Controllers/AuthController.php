@@ -5,7 +5,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\SignupRequest;
 use App\Models\User;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -39,9 +43,8 @@ class AuthController extends Controller{
         }
     }
 
-
-
-    public function login(LoginRequest $request){
+    public function login(LoginRequest $request): Response|Application|ResponseFactory
+    {
         $credentials = $request->validated();
         $remember = $credentials['remember'] ?? false;
         unset($credentials['remember']);
@@ -61,7 +64,7 @@ class AuthController extends Controller{
         ]);
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request): Response|Application|ResponseFactory
     {
         /** @var User $user */
         $user = Auth::user();
@@ -78,7 +81,8 @@ class AuthController extends Controller{
         return $request->user();
     }
 
-    public function getUser($id){
+    public function getUser($id): JsonResponse
+    {
         $username = User::where('authcode', $id)->first();
         $username = $username->name;
         return response()->json([
