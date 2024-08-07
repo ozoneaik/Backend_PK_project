@@ -6,7 +6,7 @@ use App\Models\inc_dt;
 use App\Models\inc_hd;
 use Illuminate\Support\Facades\DB;
 
-class IncHdAfterSaveContoller extends Controller
+class IncHdAfterSaveController extends Controller
 {
     //
     public function getDataLocal($year, $month, $status)

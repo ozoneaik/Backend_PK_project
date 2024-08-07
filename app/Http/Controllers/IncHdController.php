@@ -29,7 +29,7 @@ class IncHdController extends Controller
     //ดึงข้อมูลจาก .30 แล้วคำนวณเพิ่อนำข้อมูลมาแสดง เตรียมส่งให้บันทึกไปยัง postgres😁
     public function qc_month($year, $month,$status){
         if ($status != '-'){
-            return App::make('App\Http\Controllers\IncHdAfterSaveContoller')->getDataLocal($year, $month,$status);
+            return App::make('App\Http\Controllers\IncHdAfterSaveController')->getDataLocal($year, $month,$status);
         }
         $startOfMonth = "$year-$month-01";
 
