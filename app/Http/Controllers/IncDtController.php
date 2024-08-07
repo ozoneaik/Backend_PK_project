@@ -13,7 +13,6 @@ class IncDtController extends Controller
 
     public function store($datas, $IncHdId,$month,$year)
     {
-//        dd($datas);
         foreach ($datas as $key => $data) {
 
             for ($i = 1; $i <= 5; $i++) {
@@ -54,7 +53,6 @@ class IncDtController extends Controller
                 $IncDt->le_id = $i;
                 $IncDt->le_name = $le_name;
                 $IncDt->rate = $rate;
-
                 $IncDt->payamnt = $data['total_received'];
                 $IncDt->paystatus = $data['paystatus'];
                 $IncDt->payremark = isset($data['payremark']) ? $data['payremark'] : '';
@@ -66,6 +64,10 @@ class IncDtController extends Controller
             }
 
             $InsertIncDetail = App::make('App\Http\Controllers\IncDetailController')->store($IncHdId,$month,$year,$IncDt->empqccode);
+
+//            if ($InsertIncDetail !== true){
+//                dd($InsertIncDetail);
+//            }
 
         }
 

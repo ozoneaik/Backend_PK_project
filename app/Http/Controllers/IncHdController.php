@@ -20,9 +20,9 @@ class IncHdController extends Controller
     public function checkIncHd($year, $month){
         $check = inc_hd::where('yearkey', $year)->where('monthkey', $month)->first();
         if ($check){
-            return response()->json(['check' => $check,'msg' => 'ต้องการอัพเดทข้อมูลหรือไม่','inc_id'=>$check->id],200);
+            return response()->json(['check' => $check,'message' => 'ต้องการอัพเดทข้อมูลหรือไม่','inc_id'=>$check->id],200);
         }else{
-            return response()->json(['check' => null,'msg' => 'ไม่เจอข้อมูล'],400);
+            return response()->json(['check' => null,'message' => 'ไม่เจอข้อมูล'],400);
         }
     }
 
@@ -250,7 +250,7 @@ class IncHdController extends Controller
         // ตรวจสอบว่ามี year และ month ที่ต้องการสร้างหรือไม่
         $existingIncHd = inc_hd::where('yearkey', $data_team['year'])->where('monthkey', $data_team['month'])->first();
         if($existingIncHd) {
-            return response()->json(['msg' => 'มีข้อมูลสำหรับเดือน '.$data_team['month'].  '/' .$data_team['year']. ' นี้อยู่แล้ว'], 400);
+            return response()->json(['message' => 'มีข้อมูลสำหรับเดือน '.$data_team['month'].  '/' .$data_team['year']. ' นี้อยู่แล้ว'], 400);
         }
 
         // เริ่มการทำธุรกรรม
@@ -289,24 +289,24 @@ class IncHdController extends Controller
                 if ($InsertIncDt) {
                     // Commit การทำธุรกรรมถ้าทุกอย่างสำเร็จ
                     DB::commit();
-                    return response()->json(['msg' => 'สร้างข้อมูลสำเร็จ'], 200);
+                    return response()->json(['message' => 'สร้างข้อมูลสำเร็จ'], 200);
                 } else {
                     // Rollback การทำธุรกรรมถ้ามีข้อผิดพลาด
                     DB::rollBack();
-                    return response()->json(['msg' => 'สร้างข้อมูลไม่สำเร็จ'], 400);
+                    return response()->json(['message' => 'สร้างข้อมูลไม่สำเร็จ'], 400);
                 }
             } else {
                 // Rollback การทำธุรกรรมถ้าการบันทึก $IncHd ไม่สำเร็จ
                 DB::rollBack();
-                return response()->json(['msg' => 'สร้างข้อมูลไม่สำเร็จ'], 400);
+                return response()->json(['message' => 'สร้างข้อมูลไม่สำเร็จ'], 400);
             }
         } catch (\Exception $e) {
             // Rollback การทำธุรกรรมถ้ามีข้อผิดพลาด
             DB::rollBack();
             if (strpos($e->getMessage(), 'invalid input syntax for type integer') !== false && strpos($e->getMessage(), 'skucode') !== false) {
-                return response()->json(['msg' => 'ไม่พบชื่อสินค้าจากรหัส skucode ในฐานข้อมูล' . PHP_EOL . 'รายละเอียดข้อผิดพลาด' . $e->getMessage()], 500);
+                return response()->json(['message' => 'ไม่พบชื่อสินค้าจากรหัส skucode ในฐานข้อมูล' . PHP_EOL . 'รายละเอียดข้อผิดพลาด' . $e->getMessage()], 500);
             }
-            return response()->json(['msg' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()], 500);
         }
     }
 
@@ -317,7 +317,7 @@ class IncHdController extends Controller
         // เช็คว่ามี ID หรือไม่
         if (!$IncHdId){
             return response()->json([
-                'msg' => 'ไม่สามารถอัพเดทข้อมูลได้ กรุณากดที่เมนู "QC สินค้า ประจำปี" แล้วลองใหม่อีกครั้ง หรือติดต่อแผนก IT'
+                'message' => 'ไม่สามารถอัพเดทข้อมูลได้ กรุณากดที่เมนู "QC สินค้า ประจำปี" แล้วลองใหม่อีกครั้ง หรือติดต่อแผนก IT'
             ],400);
         }
 
@@ -350,12 +350,12 @@ class IncHdController extends Controller
             $InsertIncDt = App::make('App\Http\Controllers\IncDtController')->store($request->datas, $IncHdId, $updateIncHd->monthkey, $updateIncHd->yearkey);
             DB::commit();
             return response()->json([
-                'msg' => 'อัพเดทข้อมูลสำเร็จ กดตกลงเพื่อดำเนินการต่อ'
+                'message' => 'อัพเดทข้อมูลสำเร็จ กดตกลงเพื่อดำเนินการต่อ'
             ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'msg' => 'เกิดข้อผิดพลาดในการอัพเดทข้อมูล: ' . $e->getMessage()
+                'message' => 'เกิดข้อผิดพลาดในการอัพเดทข้อมูล: ' . $e->getMessage()
             ], 500);
         }
     }

@@ -56,6 +56,13 @@ class IncDetailController extends Controller
             $IncDetail->monthkey = $month;
             $IncDetail->empqccode = $empqccode;
             $IncDetail->skucode = $result->skucode;
+//            if ($result->pname){
+//            }else{
+//                $data = [
+//                    'message' => "ไม่มีชื่อสินค้ารหัส $IncDetail->skucode $result->skuqty $result->le_name $result->timeperpcs"
+//                ];
+//                return $data;
+//            }
             $IncDetail->skuname = $result->pname;
             $IncDetail->skuqty = $result->skuqty;
             $ConvertLevelId = substr($result->levelid, 3);
