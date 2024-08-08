@@ -18,6 +18,8 @@ return new class extends Migration
             $table->integer('wo_year');
             $table->integer('wo_month');
             $table->integer('workday');
+            $table->string('created_by')->nullable();
+            $table->string('updated_by')->nullable();
             $table->timestamps();
         });
     }

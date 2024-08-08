@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\qc_workday;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -10,55 +11,80 @@ class QcWorkdayController extends Controller
 {
     //
 
-    public function index(){
-        $workdays = qc_workday::all();
+    public function list($year) : JsonResponse {
+        // Fetch existing workdays
+        $workdays = qc_workday::where('wo_year', $year)->get();
+//        dd($workdays);
+
+        // Create an array to hold all months
+        $allMonths = [];
+        for ($month = 1; $month <= 12; $month++) {
+            $allMonths[$month] = [
+                'id' => null,
+                'wo_year' => $year,
+                'wo_month' => $month,
+                'workday' => '-',
+                'created_at' => '-',
+                'updated_at' => '-',
+                'created_by' => '-',
+                'updated_by' => '-',
+            ];
+        }
+
+        // Update with existing workdays
+        foreach ($workdays as $workday) {
+            $allMonths[$workday->wo_month] = [
+                'id' => $workday->id,
+                'wo_year' => $workday->wo_year,
+                'wo_month' => $workday->wo_month,
+                'workday' => $workday->workday,
+                'created_by' => $workday->created_by,
+                'updated_by' => $workday->updated_by,
+                'created_at' => $workday->created_at,
+                'updated_at' => $workday->updated_at,
+            ];
+        }
+
+        // Convert array to a list
+        $result = array_values($allMonths);
+
         return response()->json([
-            'workdays' => $workdays,
+            'workdays' => $result,
         ]);
     }
+
 
     public function store(Request $request): JsonResponse
     {
         $workday = $request->all();
-        $year_month = $workday['wo_year'] . '-' . $workday['wo_month'];
-        $workdays = qc_workday::all();
-        foreach ($workdays as $check) {
-            $checkBase = $check->wo_year . '-' . $check->wo_month;
-            if ($year_month == $checkBase) {
-                return response()->json([
-                    'message' => 'ขออภัยคุณเพิ่มจำนวนวันของ '.$year_month. ' แล้ว'
-                ],400);
-            }
-        }
-
-        $insert = new qc_workday();
-        $insert->wo_year = $workday['wo_year'];
-        $insert->wo_month = $workday['wo_month'];
-        $insert->workday = $workday['workday'];
-        $insert->save();
-        return response()->json([
-            'message' => 'บันทึกข้อมูลเสร็จสิ้น'
-        ],200);
-    }
-
-    public function update(Request $request){
+        $check = qc_workday::where('wo_year', $workday['wo_year'])->where('wo_month', $workday['wo_month'])->first();
         try {
-            $data = $request->data;
-            foreach ($data as $key => $value) {
-                $update = qc_workday::find($value['id']);
-                $update->wo_year = $value['wo_year'];
-                $update->wo_month = $value['wo_month'];
-                $update->workday = $value['workday'];
-                $update->save();
+            if ($workday['workday'] <= 0){
+                throw new \InvalidArgumentException('จำนวนวันต้องมากกว่า 0 วัน');
             }
-
-            return response()->json([
-                'message' => 'อัพเดทข้อมูลสำเร็จ'
-            ]);
-        }catch (\Exception $e){
-            return response()->json([
-                'message' => $e->getMessage()
-            ]);
+            if ($check) {
+                //update
+                $check->workday = $workday['workday'];
+                $check->updated_by = auth()->user()->name;
+                $check->update();
+            }else{
+                //store
+                $create = new qc_workday();
+                $create->wo_year = $workday['wo_year'];
+                $create->wo_month = $workday['wo_month'];
+                $create->workday = $workday['workday'];
+                $create->created_by = auth()->user()->name;
+                $create->updated_by = '-';
+                $create->save();
+            }
+            $message = "สร้างหรืออัพเดทจำนวนวันของเดือน ".$workday['wo_year']."/".$workday['wo_month'].' สำเร็จ';
+            $status = 200;
+        }catch (\InvalidArgumentException $exception){
+            $message = $exception->getMessage();
+            $status = 400;
         }
+        return response()->json([
+            'message' => $message
+        ],$status);
     }
 }
