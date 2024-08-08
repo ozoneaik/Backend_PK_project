@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\DB;
 
 class ApproveIncHdController extends Controller
 {
-    public function ApproveByQC(Request $request){
-//        dd(request()->all());
+    public function ApproveByHR(Request $request){
+//        dd(request()->all(),'send approve by HR');
         DB::beginTransaction();
         $IncHD = inc_hd::find($request->inc_id);
 
@@ -19,19 +19,19 @@ class ApproveIncHdController extends Controller
             $IncHD->confirmdate = Carbon::now();
             if ($IncHD->save()){
                 DB::commit();
-                return response()->json(['msg' => 'ส่งอนุมัติสำเร็จ กรุณารอ อนุมัติ'],200);
+                return response()->json(['message' => 'กรุณารอ QC อนุมัติ'],200);
             }else{
                 DB::rollBack();
-                return response()->json(['msg' => 'ส่งอนุมัติไม่สำเร็จ'],400);
+                return response()->json(['message' => 'ส่งอนุมัติไม่สำเร็จ'],400);
             }
 
         }else{
-            return response()->json(['msg' => 'ไม่เจอข้อมูลในฐานข้อมูล ติดต่อ IT'],400);
+            return response()->json(['message' => 'ไม่เจอข้อมูลในฐานข้อมูล ติดต่อ IT'],400);
         }
     }
 
-    public function ApproveByHR(Request $request){
-//        dd(request()->all());
+    public function ApproveByQC(Request $request){
+//        dd(request()->all(), 'send approve by QC');
         DB::beginTransaction();
         $IncHD = inc_hd::find($request->inc_id);
 
@@ -41,14 +41,14 @@ class ApproveIncHdController extends Controller
             $IncHD->status = 'approve';
             if ($IncHD->save()){
                 DB::commit();
-                return response()->json(['msg' => 'อนุมัติสำเร็จ กรุณารอ อนุมัติ'],200);
+                return response()->json(['message' => 'ส่งรายงานเพื่อให้ HR อนุมัติการจ่ายแล้ว'],200);
             }else{
                 DB::rollBack();
-                return response()->json(['msg' => 'อนุมัติไม่สำเร็จ'],400);
+                return response()->json(['message' => 'อนุมัติไม่สำเร็จ'],400);
             }
 
         }else{
-            return response()->json(['msg' => 'ไม่เจอข้อมูลในฐานข้อมูล ติดต่อ IT'],400);
+            return response()->json(['message' => 'ไม่เจอข้อมูลในฐานข้อมูล ติดต่อ IT'],400);
         }
     }
 
@@ -62,14 +62,14 @@ class ApproveIncHdController extends Controller
             $IncHD->status = 'complete';
             if ($IncHD->save()){
                 DB::commit();
-                return response()->json(['msg' => 'ยืนยันการจ่ายสำเร็จ กรุณารอ อนุมัติ'],200);
+                return response()->json(['message' => 'ยืนยันการจ่ายสำเร็จ'],200);
             }else{
                 DB::rollBack();
-                return response()->json(['msg' => 'ยืนยันการจ่ายไม่สำเร็จ'],400);
+                return response()->json(['message' => 'ยืนยันการจ่ายไม่สำเร็จ'],400);
             }
 
         }else{
-            return response()->json(['msg' => 'ไม่เจอข้อมูลในฐานข้อมูล ติดต่อ IT'],400);
+            return response()->json(['message' => 'ไม่เจอข้อมูลในฐานข้อมูล ติดต่อ IT'],400);
         }
     }
 }

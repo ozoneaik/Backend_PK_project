@@ -236,9 +236,9 @@ class IncHdController extends Controller
         ];
 
         if ($amount_qc_users){
-            return response()->json(['amount_qc_users' => $amount_qc_users, 'data_teams' => $data_teams,'msg' => 'ดึงข้อมูลสำเร็จ'],200);
+            return response()->json(['amount_qc_users' => $amount_qc_users, 'data_teams' => $data_teams,'message' => 'ดึงข้อมูลสำเร็จ'],200);
         }else{
-            return response()->json(['amount_qc_users' => null, 'data_teams' => null,'msg' => 'ดึงข้อมูลไม่สำเร็จ'],400);
+            return response()->json(['amount_qc_users' => null, 'data_teams' => null,'message' => 'ดึงข้อมูลไม่สำเร็จ'],400);
         }
     }
 

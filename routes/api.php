@@ -61,9 +61,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/qc_month/store', [IncHdController::class, 'store']);
         Route::post('/qc_month/update', [IncHdController::class, 'update']);
 
-        //approve by QC
-        Route::post('/qc_month/qc/update',[ApproveIncHdController::class,'ApproveByQC']);
+        //approve by QC And HR
         Route::post('/qc_month/hr/update',[ApproveIncHdController::class,'ApproveByHR']);
+        Route::post('/qc_month/qc/update',[ApproveIncHdController::class,'ApproveByQC']);
         Route::post('/qc_month/hr/confirmpaydate',[ApproveIncHdController::class,'ConfirmPayDate']);
 
         //User manage
