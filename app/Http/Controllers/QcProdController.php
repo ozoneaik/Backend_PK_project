@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\QcProductRequest;
+use App\Models\ProductNotFound;
 use App\Models\qc_prod;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -67,5 +68,12 @@ class QcProdController extends Controller
         $product->updatedate = Carbon::now();
         $product->save();
         return response()->json(['hello', $id]);
+    }
+
+    public function notFound($year,$month){
+        $notFound = ProductNotFound::where('year',$year)->where('month',$month)->get();
+        return response()->json([
+            'list' => $notFound,
+        ]);
     }
 }

@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\inc_detail;
+use App\Models\ProductNotFound;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class IncDetailController extends Controller
 {
     //
-    public function store($IncHdId,$month,$year,$empqccode)
+    public function store($IncHdId, $month, $year, $empqccode) : bool
     {
 
         $results = DB::connection('mysql_main_qc')->table('qc_log_data as ld')
@@ -50,34 +51,40 @@ class IncDetailController extends Controller
             ->orderBy('le_name')
             ->get();
 
-        foreach ($results as $index=>$result) {
+        foreach ($results as $index => $result) {
             $IncDetail = new inc_detail();
             $IncDetail->inc_id = $IncHdId;
             $IncDetail->monthkey = $month;
             $IncDetail->empqccode = $empqccode;
             $IncDetail->skucode = $result->skucode;
-//            if ($result->pname){
-//            }else{
-//                $data = [
-//                    'message' => "ไม่มีชื่อสินค้ารหัส $IncDetail->skucode $result->skuqty $result->le_name $result->timeperpcs"
-//                ];
-//                return $data;
-//            }
-            $IncDetail->skuname = $result->pname;
+            // กรณีไม่เจอชื่อสินค้า
+            if (!$result->pname) {
+                $not_founds = new ProductNotFound();
+                $not_founds->skucode = $result->skucode;
+                $not_founds->skuname = 'ไม่พบสินค้า';
+                $not_founds->year = $year;
+                $not_founds->month = $month;
+                $IncDetail->skuname = 'ไม่มีชื่อสินค้า';
+                $IncDetail->le_id = 6;
+                $IncDetail->le_name = 'L006';
+                $IncDetail->timeperpcs = Carbon::createFromTimestamp('00:00:00')->format('H:i:s');
+                $not_founds->save();
+            } else {
+                $IncDetail->skuname = $result->pname;
+                $ConvertLevelId = substr($result->levelid, 3);
+                $IncDetail->le_id = $ConvertLevelId;
+                $IncDetail->le_name = $result->le_name;
+                $IncDetail->timeperpcs = Carbon::createFromTimestamp($result->timeperpcs)->format('H:i:s');
+            }
             $IncDetail->skuqty = $result->skuqty;
-            $ConvertLevelId = substr($result->levelid, 3);
-            $IncDetail->le_id = $ConvertLevelId;
-            $IncDetail->le_name = $result->le_name;
-            $IncDetail->timeperpcs = Carbon::createFromTimestamp($result->timeperpcs)->format('H:i:s');
-
             $IncDetail->save();
         }
-
         return true;
-
     }
 
-    public function update(){
+    public function update() : int
+    {
         return 0;
     }
 }
+

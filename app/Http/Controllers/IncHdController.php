@@ -1,14 +1,17 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\inc_detail;
 use App\Models\inc_dt;
 use App\Models\inc_hd;
+use App\Models\ProductNotFound;
 use App\Models\qc_rate;
 use App\Models\qc_time;
 use App\Models\qc_workday;
 use App\Models\QcMain;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -17,30 +20,32 @@ class IncHdController extends Controller
 {
 
     //เช็คว่า มีข้อมูลนี้อยู่ในฐานข้อมูลหรือไม่ จากหน้าแก้ไข 😀
-    public function checkIncHd($year, $month){
+    public function checkIncHd($year, $month)
+    {
         $check = inc_hd::where('yearkey', $year)->where('monthkey', $month)->first();
-        if ($check){
-            return response()->json(['check' => $check,'message' => 'ต้องการอัพเดทข้อมูลหรือไม่','inc_id'=>$check->id],200);
-        }else{
-            return response()->json(['check' => null,'message' => 'ไม่เจอข้อมูล'],400);
+        if ($check) {
+            return response()->json(['check' => $check, 'message' => 'ต้องการอัพเดทข้อมูลหรือไม่', 'inc_id' => $check->id], 200);
+        } else {
+            return response()->json(['check' => null, 'message' => 'ไม่เจอข้อมูล'], 400);
         }
     }
 
     //ดึงข้อมูลจาก .30 แล้วคำนวณเพิ่อนำข้อมูลมาแสดง เตรียมส่งให้บันทึกไปยัง postgres😁
-    public function qc_month($year, $month,$status){
-        if ($status != '-'){
-            return App::make('App\Http\Controllers\IncHdAfterSaveController')->getDataLocal($year, $month,$status);
+    public function qc_month($year, $month, $status)
+    {
+        if ($status != '-') {
+            return App::make('App\Http\Controllers\IncHdAfterSaveController')->getDataLocal($year, $month, $status);
         }
         $startOfMonth = "$year-$month-01";
 
 
         //ตรวจสอบก่อนว่าได้มีการเพิ่ม day ใน ManageDay หรือยัง
         $check_workday = qc_workday::where('wo_year', $year)->where('wo_month', $month)->first();
-        if (!$check_workday){
+        if (!$check_workday) {
             return response([
                 'message' => 'ไม่พบจำนวนวันที่ทำงาน กรุณาเพิ่มจำนวนวันในเมนู จัดการวันทำงาน'
-            ],412);
-        }else{
+            ], 412);
+        } else {
             $workday = $check_workday->workday;
         }
 //        //ดึงข้อมูลนับจำนวนวันของเดือนนั้นๆ
@@ -52,25 +57,24 @@ class IncHdController extends Controller
 //        $workday = $workdayQL['day'];
 
 
-
         //ดึงข้อมูลจาก times
-        $times = qc_time::orderBy('ti_id','asc')->get();
+        $times = qc_time::orderBy('ti_id', 'asc')->get();
         $timeValues = $times->pluck('time')->toArray();
 
         $amount_qc_users = QcMain::select('qc_user.emp_name', 'qc_log_data.empqc')
             ->selectRaw('COUNT(qc_log_data.empqc) as empqc_count')
             ->selectRaw('DATE_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs))), "%H:%i") as HM')
-            ->selectRaw('DATE_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / '.$workday.'), "%H:%i") as HD')
+            ->selectRaw('DATE_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / ' . $workday . '), "%H:%i") as HD')
             ->selectRaw('SUM(CASE WHEN qc_level.levelname = "Very easy" THEN 1 ELSE 0 END) AS level_very_easy')
             ->selectRaw('SUM(CASE WHEN qc_level.levelname = "Easy" THEN 1 ELSE 0 END) AS level_easy')
             ->selectRaw('SUM(CASE WHEN qc_level.levelname = "Middling" THEN 1 ELSE 0 END) AS level_middling')
             ->selectRaw('SUM(CASE WHEN qc_level.levelname = "Hard" THEN 1 ELSE 0 END) AS level_hard')
             ->selectRaw('SUM(CASE WHEN qc_level.levelname = "Very Hard" THEN 1 ELSE 0 END) AS level_very_hard')
             ->selectRaw('CASE
-                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / '.$workday.') >= "' . $timeValues[3] . '" AND SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / '.$workday.') < "' . $timeValues[2] . '" THEN "C"
-                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / '.$workday.') >= "' . $timeValues[2] . '" AND SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / '.$workday.') < "' . $timeValues[1] . '" THEN "B"
-                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / '.$workday.') >= "' . $timeValues[1] . '" AND SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / '.$workday.') < "' . $timeValues[0] . '" THEN "A"
-                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / '.$workday.') >= "' . $timeValues[0] . '" THEN "A+"
+                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / ' . $workday . ') >= "' . $timeValues[3] . '" AND SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / ' . $workday . ') < "' . $timeValues[2] . '" THEN "C"
+                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / ' . $workday . ') >= "' . $timeValues[2] . '" AND SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / ' . $workday . ') < "' . $timeValues[1] . '" THEN "B"
+                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / ' . $workday . ') >= "' . $timeValues[1] . '" AND SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / ' . $workday . ') < "' . $timeValues[0] . '" THEN "A"
+                WHEN SEC_TO_TIME(SUM(TIME_TO_SEC(qc_prod.timeperpcs)) / ' . $workday . ') >= "' . $timeValues[0] . '" THEN "A+"
                 ELSE "ไม่ผ่าน"
             END AS grade')
             ->leftJoin('qc_prod', 'qc_log_data.skucode', '=', 'qc_prod.pid')
@@ -81,9 +85,6 @@ class IncHdController extends Controller
             ->whereBetween('qc_log_data.datekey', [$startOfMonth, DB::raw("LAST_DAY('$startOfMonth')")])
             ->groupBy('qc_user.emp_name', 'qc_log_data.empqc')
             ->get();
-
-
-
 
 
         $total_empqc_teams = 0;
@@ -99,7 +100,7 @@ class IncHdController extends Controller
         $statuss = true;
 
         //ดึงข้อมูล rate
-        $rate = qc_rate::orderBy('ra_id','asc')->get();
+        $rate = qc_rate::orderBy('ra_id', 'asc')->get();
         foreach ($amount_qc_users as $index => $user) {
             $user->rateVeryEasy = '0';
             $user->rateEasy = '0';
@@ -215,7 +216,6 @@ class IncHdController extends Controller
         }
 
 
-
         $data_teams = [
             'average_time_HD' => $average_time_HD,
             'average_time_HM' => $average_time_HM,
@@ -235,29 +235,30 @@ class IncHdController extends Controller
             'total_empqc_teams' => $total_empqc_teams,
         ];
 
-        if ($amount_qc_users){
-            return response()->json(['amount_qc_users' => $amount_qc_users, 'data_teams' => $data_teams,'message' => 'ดึงข้อมูลสำเร็จ'],200);
-        }else{
-            return response()->json(['amount_qc_users' => null, 'data_teams' => null,'message' => 'ดึงข้อมูลไม่สำเร็จ'],400);
+        if ($amount_qc_users) {
+            return response()->json(['amount_qc_users' => $amount_qc_users, 'data_teams' => $data_teams, 'message' => 'ดึงข้อมูลสำเร็จ'], 200);
+        } else {
+            return response()->json(['amount_qc_users' => null, 'data_teams' => null, 'message' => 'ดึงข้อมูลไม่สำเร็จ'], 400);
         }
     }
 
     //สร้างข้อมูลลงใน ฐานข้อมูล😂
-    public function store(Request $request){
+    public function store(Request $request): JsonResponse
+    {
+        $confirm = $request->confirm;
         $datas = $request->datas;
         $data_team = $request->NewData_team;
 
         // ตรวจสอบว่ามี year และ month ที่ต้องการสร้างหรือไม่
         $existingIncHd = inc_hd::where('yearkey', $data_team['year'])->where('monthkey', $data_team['month'])->first();
-        if($existingIncHd) {
-            return response()->json(['message' => 'มีข้อมูลสำหรับเดือน '.$data_team['month'].  '/' .$data_team['year']. ' นี้อยู่แล้ว'], 400);
+        if ($existingIncHd) {
+            return response()->json(['message' => 'มีข้อมูลสำหรับเดือน ' . $data_team['month'] . '/' . $data_team['year'] . ' นี้อยู่แล้ว'], 400);
         }
 
-        // เริ่มการทำธุรกรรม
+        // เริ่มการทำธุรกรรมหลัก
         DB::beginTransaction();
 
         try {
-
             $monthPattern = str_pad($data_team['month'], 2, '0', STR_PAD_LEFT);
             $datePattern = "{$data_team['year']}-{$monthPattern}-%";
             $workdayQL = QcMain::where('datekey', 'LIKE', $datePattern)
@@ -274,7 +275,7 @@ class IncHdController extends Controller
             $IncHd->status = $data_team['status'];
             $IncHd->numofemp = count($datas);
             $IncHd->totalqcqty = $data_team['total_empqc_teams'];
-            $IncHd->totaltimepermonth = $data_team['average_time_HM']; // กำหนดค่าให้กับ IncHd
+            $IncHd->totaltimepermonth = $data_team['average_time_HM'];
             $IncHd->totaltimeperday = $data_team['average_time_HD'];
             $IncHd->gradeteam = $data_team['average_grade'];
             $IncHd->payamntteam = $data_team['total_receiveds'];
@@ -287,38 +288,61 @@ class IncHdController extends Controller
             if ($IncHd->save()) {
                 $InsertIncDt = App::make('App\Http\Controllers\IncDtController')->store($datas, $IncHd->id, $data_team['month'], $data_team['year']);
                 if ($InsertIncDt) {
-                    // Commit การทำธุรกรรมถ้าทุกอย่างสำเร็จ
+
+                    // Commit การทำธุรกรรมหลักถ้าทุกอย่างสำเร็จ
                     DB::commit();
+
+                    // ตรวจสอบสินค้าที่ผิดพลาดและจัดการภายหลัง
+                    $checkErrProduct = ProductNotFound::where('year', $data_team['year'])->where('month', $data_team['month'])->get();
+                    if (!$confirm) {
+                        if ($checkErrProduct->isNotEmpty()) {
+                            $delete_hds = inc_hd::where('yearkey', $data_team['year'])->where('monthkey', $data_team['month'])->first();
+                            $delete_dt = inc_dt::where('inc_id', $delete_hds->id)->get();
+                            $delete_detail = inc_detail::where('inc_id', $delete_hds->id)->get();
+                            $delete_detail->each->delete();
+                            $delete_dt->each->delete();
+                            $delete_hds->delete();
+                            return response()->json(['message' => 'ตรวจพบว่าไม่มีรหัสสินค้าบางตัวที่ไม่มีชื่อสินค้าในฐานข้อมูล กดบันทึกอีกครั้งหากต้องการบันทึกต่อ'], 400);
+                        }
+                    }
+
+                    // ลบข้อมูลที่มีข้อผิดพลาดจาก ProductNotFound ถ้า $confirm เป็น true
+                    if ($confirm) {
+                        ProductNotFound::where('year', $data_team['year'])->where('month', $data_team['month'])->delete();
+                    }
+
                     return response()->json(['message' => 'สร้างข้อมูลสำเร็จ'], 200);
                 } else {
-                    // Rollback การทำธุรกรรมถ้ามีข้อผิดพลาด
+                    // Rollback การทำธุรกรรมหลักถ้ามีข้อผิดพลาด
                     DB::rollBack();
                     return response()->json(['message' => 'สร้างข้อมูลไม่สำเร็จ'], 400);
                 }
             } else {
-                // Rollback การทำธุรกรรมถ้าการบันทึก $IncHd ไม่สำเร็จ
+                // Rollback การทำธุรกรรมหลักถ้าการบันทึก $IncHd ไม่สำเร็จ
                 DB::rollBack();
                 return response()->json(['message' => 'สร้างข้อมูลไม่สำเร็จ'], 400);
             }
         } catch (\Exception $e) {
-            // Rollback การทำธุรกรรมถ้ามีข้อผิดพลาด
+            // Rollback การทำธุรกรรมหลักถ้ามีข้อผิดพลาด
             DB::rollBack();
             if (strpos($e->getMessage(), 'invalid input syntax for type integer') !== false && strpos($e->getMessage(), 'skucode') !== false) {
                 return response()->json(['message' => 'ไม่พบชื่อสินค้าจากรหัส skucode ในฐานข้อมูล' . PHP_EOL . 'รายละเอียดข้อผิดพลาด' . $e->getMessage()], 500);
             }
-            return response()->json(['message' => 'เกิดข้อผิดพลาด: ' . $e->getMessage()], 500);
+            return response()->json(['message' => $e->getMessage()], 500);
         }
     }
 
-    public function update(Request $request){
+
+    public function update(Request $request): JsonResponse
+    {
 //        dd($request->all());
         $IncHdId = $request->inc_id;
 
         // เช็คว่ามี ID หรือไม่
-        if (!$IncHdId){
+        if (!$IncHdId) {
             return response()->json([
                 'message' => 'ไม่สามารถอัพเดทข้อมูลได้ กรุณากดที่เมนู "QC สินค้า ประจำปี" แล้วลองใหม่อีกครั้ง หรือติดต่อแผนก IT'
-            ],400);
+            ], 400);
         }
 
         DB::beginTransaction();
@@ -359,8 +383,6 @@ class IncHdController extends Controller
             ], 500);
         }
     }
-
-
 
 
 }

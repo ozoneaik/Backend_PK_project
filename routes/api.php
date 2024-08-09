@@ -79,6 +79,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/store', [QcProdController::class, 'store']);
         Route::get('edit/{id}', [QcProdController::class, 'edit']);
         Route::post('/update/{id}', [QcProdController::class, 'update']);
+        Route::get('/not-found/{year}/{month}', [QcProdController::class, 'notFound']);
     });
 
 });
