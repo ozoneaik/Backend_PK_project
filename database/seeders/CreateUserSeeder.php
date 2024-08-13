@@ -36,5 +36,14 @@ class CreateUserSeeder extends Seeder
             'incentive' => 'incentive',
             'password' => Hash::make('1111'),
         ]);
+        \App\Models\User::factory()->create([
+            'email' => 'it@gmail.com',
+            'emp_role' => 'IT',
+            'name' => 'IT ตัวปลอม',
+            'emp_status' => 'active',
+            'authcode' => 'IT',
+            'incentive' => 'incentive',
+            'password' => Hash::make('1111'),
+        ]);
     }
 }
