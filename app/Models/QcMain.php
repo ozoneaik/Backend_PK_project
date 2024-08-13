@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class QcMain extends Model
 {
     use HasFactory;
-        protected $connection = 'mysql_main_qc';
-        protected $table = 'qc_log_data';
+
+    protected $connection = 'mysql_main_qc';
+    protected $table = 'qc_log_data';
 }

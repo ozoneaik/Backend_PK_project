@@ -4,6 +4,12 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * @property mixed $timeperpcs
+ * @property mixed $pid
+ * @property mixed $pname
+ * @property mixed $levelid
+ */
 class QcProductRequest extends FormRequest
 {
     /**
@@ -11,7 +17,7 @@ class QcProductRequest extends FormRequest
      *
      * @return bool
      */
-    public function authorize()
+    public function authorize() : bool
     {
         return true;
     }
@@ -21,7 +27,7 @@ class QcProductRequest extends FormRequest
      *
      * @return array<string, mixed>
      */
-    public function rules()
+    public function rules() : array
     {
         return [
             'pid' => 'required|unique:qc_prods,pid',
@@ -31,7 +37,7 @@ class QcProductRequest extends FormRequest
         ];
     }
 
-    public function messages()
+    public function messages() : array
     {
         return [
             'pid.unique' => 'มีรหัสสินค้านี้ในฐานข้อมูลอยู่แล้ว',

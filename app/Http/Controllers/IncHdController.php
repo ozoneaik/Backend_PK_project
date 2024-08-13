@@ -38,6 +38,8 @@ class IncHdController extends Controller
         }
         $startOfMonth = "$year-$month-01";
 
+        //ลบข้อมูลใน product_not_founds ก่อน
+        ProductNotFound::select('skucode')->where('year', $year)->where('month', $month)->delete();
 
         //ตรวจสอบก่อนว่าได้มีการเพิ่ม day ใน ManageDay หรือยัง
         $check_workday = qc_workday::where('wo_year', $year)->where('wo_month', $month)->first();
@@ -48,14 +50,6 @@ class IncHdController extends Controller
         } else {
             $workday = $check_workday->workday;
         }
-//        //ดึงข้อมูลนับจำนวนวันของเดือนนั้นๆ
-//        $monthPattern = str_pad($month, 2, '0', STR_PAD_LEFT);
-//        $datePattern = "{$year}-{$monthPattern}-%";
-//        $workdayQL = QcMain::where('datekey', 'LIKE', $datePattern)
-//            ->select(DB::raw('COUNT(DISTINCT DATE_FORMAT(datekey, "%Y-%m-%d")) AS day'))
-//            ->first();
-//        $workday = $workdayQL['day'];
-
 
         //ดึงข้อมูลจาก times
         $times = qc_time::orderBy('ti_id', 'asc')->get();
@@ -86,6 +80,23 @@ class IncHdController extends Controller
             ->groupBy('qc_user.emp_name', 'qc_log_data.empqc')
             ->get();
 
+        //เช็คว่ามีรหัสสินค้าไหนที่ไม่มีชื่อสินค้าบ้าง
+        $missingProductNames = QcMain::select('qc_log_data.skucode')
+            ->leftJoin('qc_prod', 'qc_log_data.skucode', '=', 'qc_prod.pid')
+            ->whereBetween('datekey', [$startOfMonth, DB::raw("LAST_DAY('$startOfMonth')")])
+            ->whereNull('qc_prod.pname')
+            ->groupBy('qc_log_data.skucode')
+            ->get();
+        if (count($missingProductNames) > 0) {
+            foreach ($missingProductNames as $missingProductName) {
+                $ProductNotFound = new ProductNotFound();
+                $ProductNotFound->skucode = $missingProductName->skucode;
+                $ProductNotFound->skuname = 'ไม่พบสินค้า';
+                $ProductNotFound->year = $year;
+                $ProductNotFound->month = $month;
+                $ProductNotFound->save();
+            }
+        }
 
         $total_empqc_teams = 0;
         $total_HD = 0; //HD
@@ -214,8 +225,6 @@ class IncHdController extends Controller
             }
             $total_receiveds += $user->total_received;
         }
-
-
         $data_teams = [
             'average_time_HD' => $average_time_HD,
             'average_time_HM' => $average_time_HM,
@@ -236,7 +245,11 @@ class IncHdController extends Controller
         ];
 
         if ($amount_qc_users) {
-            return response()->json(['amount_qc_users' => $amount_qc_users, 'data_teams' => $data_teams, 'message' => 'ดึงข้อมูลสำเร็จ'], 200);
+            return response()->json([
+                'amount_qc_users' => $amount_qc_users,
+                'data_teams' => $data_teams,
+                'message' => 'ดึงข้อมูลสำเร็จ',
+                'productNotFound' => $missingProductNames], 200);
         } else {
             return response()->json(['amount_qc_users' => null, 'data_teams' => null, 'message' => 'ดึงข้อมูลไม่สำเร็จ'], 400);
         }
@@ -288,29 +301,8 @@ class IncHdController extends Controller
             if ($IncHd->save()) {
                 $InsertIncDt = App::make('App\Http\Controllers\IncDtController')->store($datas, $IncHd->id, $data_team['month'], $data_team['year']);
                 if ($InsertIncDt) {
-
                     // Commit การทำธุรกรรมหลักถ้าทุกอย่างสำเร็จ
                     DB::commit();
-
-                    // ตรวจสอบสินค้าที่ผิดพลาดและจัดการภายหลัง
-                    $checkErrProduct = ProductNotFound::where('year', $data_team['year'])->where('month', $data_team['month'])->get();
-                    if (!$confirm) {
-                        if ($checkErrProduct->isNotEmpty()) {
-                            $delete_hds = inc_hd::where('yearkey', $data_team['year'])->where('monthkey', $data_team['month'])->first();
-                            $delete_dt = inc_dt::where('inc_id', $delete_hds->id)->get();
-                            $delete_detail = inc_detail::where('inc_id', $delete_hds->id)->get();
-                            $delete_detail->each->delete();
-                            $delete_dt->each->delete();
-                            $delete_hds->delete();
-                            return response()->json(['message' => 'ตรวจพบว่าไม่มีรหัสสินค้าบางตัวที่ไม่มีชื่อสินค้าในฐานข้อมูล กดบันทึกอีกครั้งหากต้องการบันทึกต่อ'], 400);
-                        }
-                    }
-
-                    // ลบข้อมูลที่มีข้อผิดพลาดจาก ProductNotFound ถ้า $confirm เป็น true
-                    if ($confirm) {
-                        ProductNotFound::where('year', $data_team['year'])->where('month', $data_team['month'])->delete();
-                    }
-
                     return response()->json(['message' => 'สร้างข้อมูลสำเร็จ'], 200);
                 } else {
                     // Rollback การทำธุรกรรมหลักถ้ามีข้อผิดพลาด

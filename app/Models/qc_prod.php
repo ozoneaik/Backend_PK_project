@@ -2,9 +2,20 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property mixed $pid
+ * @property mixed $pname
+ * @property mixed $levelid
+ * @property mixed|string $timeperpcs
+ * @property Carbon|mixed $createdate
+ * @property Carbon|mixed $updatedate
+ * @method static findOrFail($id)
+ * @method static find($id)
+ */
 class qc_prod extends Model
 {
     use HasFactory;
@@ -13,7 +24,7 @@ class qc_prod extends Model
 
     public $timestamps = false;
 
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 

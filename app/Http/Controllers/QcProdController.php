@@ -6,19 +6,13 @@ use App\Http\Requests\QcProductRequest;
 use App\Models\ProductNotFound;
 use App\Models\qc_prod;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\JsonResponse;
 
 class QcProdController extends Controller
 {
 
-    public function index()
+    public function index(): JsonResponse
     {
-
-//        $products = DB::connection('mysql_main_qc')
-//            ->table('qc_prod')
-//            ->join('qc_level', 'qc_prod.levelid', '=', 'qc_level.levelid')
-//            ->get();
         $products = qc_prod::all();
         if (count($products) > 0){
             return response()->json(['products' => $products,'msg' => 'ตรวจพบรายการสินค้าในฐานข้อมุล'], 200);
@@ -28,9 +22,8 @@ class QcProdController extends Controller
     }
 
 
-    public function store(QcProductRequest $request)
+    public function store(QcProductRequest $request): JsonResponse
     {
-//        dd($request->all());
         $timeperpcs = (string)$request->timeperpcs;
         $products = new qc_prod();
         $products->pid = $request->pid;
@@ -46,7 +39,7 @@ class QcProdController extends Controller
         ], 200);
     }
 
-    public function edit($id)
+    public function edit($id) : JsonResponse
     {
         $product = qc_prod::findOrFail($id);
         if ($product) {
@@ -59,7 +52,7 @@ class QcProdController extends Controller
         ], 400);
     }
 
-    public function update(QcProductRequest $request, $id)
+    public function update(QcProductRequest $request, $id) : JsonResponse
     {
 
         $product = qc_prod::find($id);
@@ -70,7 +63,7 @@ class QcProdController extends Controller
         return response()->json(['hello', $id]);
     }
 
-    public function notFound($year,$month){
+    public function notFound($year,$month) : JsonResponse{
         $notFound = ProductNotFound::where('year',$year)->where('month',$month)->get();
         return response()->json([
             'list' => $notFound,
