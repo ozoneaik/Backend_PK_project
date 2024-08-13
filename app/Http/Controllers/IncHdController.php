@@ -249,7 +249,8 @@ class IncHdController extends Controller
                 'amount_qc_users' => $amount_qc_users,
                 'data_teams' => $data_teams,
                 'message' => 'ดึงข้อมูลสำเร็จ',
-                'productNotFound' => $missingProductNames], 200);
+                'productNotFound' => $missingProductNames ?? []
+            ], 200);
         } else {
             return response()->json(['amount_qc_users' => null, 'data_teams' => null, 'message' => 'ดึงข้อมูลไม่สำเร็จ'], 400);
         }
