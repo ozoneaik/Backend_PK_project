@@ -259,6 +259,7 @@ class IncHdController extends Controller
     //สร้างข้อมูลลงใน ฐานข้อมูล😂
     public function store(Request $request): JsonResponse
     {
+
         $confirm = $request->confirm;
         $datas = $request->datas;
         $data_team = $request->NewData_team;
@@ -328,20 +329,18 @@ class IncHdController extends Controller
 
     public function update(Request $request): JsonResponse
     {
-//        dd($request->all());
         $IncHdId = $request->inc_id;
-
         // เช็คว่ามี ID หรือไม่
         if (!$IncHdId) {
             return response()->json([
                 'message' => 'ไม่สามารถอัพเดทข้อมูลได้ กรุณากดที่เมนู "QC สินค้า ประจำปี" แล้วลองใหม่อีกครั้ง หรือติดต่อแผนก IT'
             ], 400);
         }
-
         DB::beginTransaction();
         try {
             $updateIncHd = inc_hd::find($IncHdId);
-            $updateIncHd->status = 'active';
+//            dd($updateIncHd);
+            $updateIncHd->status = auth()->user()->emp_role === 'QC' ? 'wait' : 'active';
             $updateIncHd->totalqcqty = $request->data_team['total_empqc_teams'];
             $updateIncHd->totaltimepermonth = $request->data_team['average_time_HM'];
             $updateIncHd->totaltimeperday = $request->data_team['average_time_HD'];
@@ -350,9 +349,9 @@ class IncHdController extends Controller
             $updateIncHd->updatebycode = auth()->user()->authcode;
             $updateIncHd->updated_at = Carbon::now();
             $updateIncHd->caldate = Carbon::now();
-            $updateIncHd->confirmdate = null;
-            $updateIncHd->confirmapprove = null;
-            $updateIncHd->confirmpaydate = null;
+//            $updateIncHd->confirmdate = null;
+//            $updateIncHd->confirmapprove = null;
+//            $updateIncHd->confirmpaydate = null;
             $updateIncHd->save();
 
 
