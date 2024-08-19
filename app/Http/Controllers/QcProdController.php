@@ -54,13 +54,21 @@ class QcProdController extends Controller
 
     public function update(QcProductRequest $request, $id) : JsonResponse
     {
-
-        $product = qc_prod::find($id);
-        $product->levelid = $request->levelid;
-        $product->timeperpcs = $request->timeperpcs;
-        $product->updatedate = Carbon::now();
-        $product->save();
-        return response()->json(['hello', $id]);
+        try {
+            $product = qc_prod::find($id);
+            $product->levelid = $request->levelid;
+            $product->timeperpcs = $request->timeperpcs;
+            $product->updatedate = Carbon::now();
+            $product->save();
+            $message = 'อัพเดทข้อมูลสินค้าสำเร็จ';
+            $status = 200;
+        }catch (\Exception $exception){
+            $status = 400;
+            $message = $exception->getMessage();
+        }
+        return response()->json([
+            'message' => $message,
+        ],$status);
     }
 
     public function notFound($year,$month) : JsonResponse{
