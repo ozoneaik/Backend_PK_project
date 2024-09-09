@@ -31,6 +31,8 @@ class QcProdController extends Controller
         $products->levelid = $request->levelid;
         $products->timeperpcs = $timeperpcs;
         $products->createdate = Carbon::now();
+        $products->createby = auth()->user()->name;
+        $products->updateby = auth()->user()->name;
         $products->updatedate = Carbon::now();
         $products->save();
 

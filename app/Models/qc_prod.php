@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property mixed|string $timeperpcs
  * @property Carbon|mixed $createdate
  * @property Carbon|mixed $updatedate
+ * @property mixed $createby
+ * @property mixed $updateby
  * @method static findOrFail($id)
  * @method static find($id)
  */
