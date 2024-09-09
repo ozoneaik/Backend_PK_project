@@ -220,9 +220,7 @@ class IncHdController extends Controller
         $total_receiveds = 0;
         foreach ($amount_qc_users as $index => $user) {
             $user->total_received = $user->total_person_received + $total_received_team;
-            if ($index == 1) {
-//                dd($user->total_received);
-            }
+            $user->paystatus = 'yes';
             $total_receiveds += $user->total_received;
         }
         $data_teams = [
