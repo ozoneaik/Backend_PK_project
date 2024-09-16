@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\inc_dt;
 use App\Models\inc_hd;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class IncHdAfterSaveController extends Controller
@@ -12,6 +13,12 @@ class IncHdAfterSaveController extends Controller
     public function getDataLocal($year, $month, $status)
     {
         $old_data_teams = inc_hd::where('yearkey', $year)->where('monthkey', $month)->first();
+        $QC_name = User::where('authcode', $old_data_teams->updatebycode)->first();
+        if (!$QC_name) {
+            $QC_name = '';
+        }else{
+            $QC_name = "( $QC_name->authcode ) $QC_name->name";
+        }
 
 //        dd('hello world');
         $IncDts = DB::table('inc_dts')
@@ -143,6 +150,7 @@ class IncHdAfterSaveController extends Controller
             'total_receiveds' => doubleval($old_data_teams->payamntteam),
 
             'createbycode' => $old_data_teams->createbycode,
+            'updatebycode' => $QC_name,
 
             'confirmapprovebycode' => $old_data_teams->confirmapprovebycode,
             'confirmpaydatebycode' => $old_data_teams->confirmpaydatebycode,

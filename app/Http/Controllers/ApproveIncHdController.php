@@ -58,7 +58,7 @@ class ApproveIncHdController extends Controller
 
         if ($IncHD){
             $IncHD->confirmpaydate = Carbon::now();
-            $IncHD->confirmpaydatebycode = auth()->user()->name.'( '.auth()->user()->authcode.' )';
+            $IncHD->confirmpaydatebycode = '( '.auth()->user()->authcode.' ) '.auth()->user()->name;
             $IncHD->status = 'complete';
             if ($IncHD->save()){
                 DB::commit();
