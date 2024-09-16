@@ -37,7 +37,7 @@ class ApproveIncHdController extends Controller
 
         if ($IncHD){
             $IncHD->confirmapprove = Carbon::now();
-            $IncHD->confirmapprovebycode = '( '.auth()->user()->authcode.' )' . auth()->user()->name;
+            $IncHD->confirmapprovebycode = '( '.auth()->user()->authcode.' ) ' . auth()->user()->name;
             $IncHD->status = 'approve';
             if ($IncHD->save()){
                 DB::commit();
