@@ -75,6 +75,7 @@ class IncHdAfterSaveController extends Controller
                 'timepermonth',
                 'timeperday'
             )
+            ->orderBy('empqc', 'asc')
             ->get();
 
         Log::info($IncDts);
