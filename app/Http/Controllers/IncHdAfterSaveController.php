@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\inc_detail;
 use App\Models\inc_dt;
 use App\Models\inc_hd;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class IncHdAfterSaveController extends Controller
 {
     //
-    public function getDataLocal($year, $month, $status)
+    public function getDataLocal($year, $month, $status) : JsonResponse
     {
         $old_data_teams = inc_hd::where('yearkey', $year)->where('monthkey', $month)->first();
         $QC_name = User::where('authcode', $old_data_teams->updatebycode)->first();
@@ -66,18 +68,46 @@ class IncHdAfterSaveController extends Controller
         };
 
         foreach ($IncDts as $index=>$IncDt) {
+//            $levels = DB::table('inc_details')
+//                ->select(
+//                    DB::raw('SUM(CASE WHEN le_id = 1 THEN skuqty ELSE 0 END) AS level_very_easy'),
+//                    DB::raw('SUM(CASE WHEN le_id = 2 THEN skuqty ELSE 0 END) AS level_easy'),
+//                    DB::raw('SUM(CASE WHEN le_id = 3 THEN skuqty ELSE 0 END) AS level_middling'),
+//                    DB::raw('SUM(CASE WHEN le_id = 4 THEN skuqty ELSE 0 END) AS level_hard'),
+//                    DB::raw('SUM(CASE WHEN le_id = 5 THEN skuqty ELSE 0 END) AS level_very_hard')
+//                )
+//                ->where('empqccode', $IncDt->empqc)
+//                ->first();
             $levels = DB::table('inc_details')
-                ->select(
-                    DB::raw('SUM(CASE WHEN le_id = 1 THEN skuqty ELSE 0 END) AS level_very_easy'),
-                    DB::raw('SUM(CASE WHEN le_id = 2 THEN skuqty ELSE 0 END) AS level_easy'),
-                    DB::raw('SUM(CASE WHEN le_id = 3 THEN skuqty ELSE 0 END) AS level_middling'),
-                    DB::raw('SUM(CASE WHEN le_id = 4 THEN skuqty ELSE 0 END) AS level_hard'),
-                    DB::raw('SUM(CASE WHEN le_id = 5 THEN skuqty ELSE 0 END) AS level_very_hard')
-                )
+                ->select(DB::raw('SUM(skuqty) as total_skuqty'), 'le_name')
                 ->where('empqccode', $IncDt->empqc)
-                ->first();
-            dd($levels,$IncDt->empqc);
+                ->where('inc_id', $old_data_teams->id)
+                ->where('le_name' ,'!=','No QC')
+                ->groupBy('le_name')
+                ->get();
+//            dd($levels,$IncDt->empqc);
             $empqc_name = DB::connection('mysql_main_qc')->table('qc_user')->select('emp_name')->where('emp_no', $IncDt->empqc)->first();
+            foreach ($levels as $level) {
+                switch ($level->le_name) {
+                    case 'Very easy':
+                        $level_very_easy = $level->total_skuqty;
+                        break;
+                    case 'Easy':
+                        $level_easy = $level->total_skuqty;
+                        break;
+                    case 'Middling':
+                        $level_middling = $level->total_skuqty;
+                        break;
+                    case 'Hard':
+                        $level_hard = $level->total_skuqty;
+                        break;
+                    case 'Very Hard':
+                        $level_very_hard = $level->total_skuqty;
+                        break;
+                }
+            }
+
+
             $amount_qc_users[] = [
                 'HM' => $IncDt->HM,
                 'HD' => $IncDt->HD,
@@ -85,11 +115,11 @@ class IncHdAfterSaveController extends Controller
                 'empqc' => $IncDt->empqc,
                 'empqc_count' => $IncDt->EmpqcCount,
                 'grade' => $IncDt->grade,
-                'level_very_easy' => $levels->level_very_easy,
-                'level_easy' => $levels->level_easy,
-                'level_middling' => $levels->level_middling,
-                'level_hard' => $levels->level_hard,
-                'level_very_hard' => $levels->level_very_hard,
+                'level_very_easy' => $level_very_easy ?? 0,
+                'level_easy' => $level_easy ?? 0,
+                'level_middling' => $level_middling ?? 0,
+                'level_hard' => $level_hard ?? 0,
+                'level_very_hard' => $level_very_hard ?? 0,
                 'rateVeryEasy' => $IncDt->rateveryeasy,
                 'rateEasy' => $IncDt->rateeasy,
                 'rateMiddling' => $IncDt->ratemiddling,
@@ -102,18 +132,18 @@ class IncHdAfterSaveController extends Controller
             ];
 //            dd($amount_qc_users[$index]['total_person_received']);
 
-            $totalVeryEasy += $levels->level_very_easy;
-            $totalEasy += $levels->level_easy;
-            $totalMiddling += $levels->level_middling;
-            $totalHard += $levels->level_hard;
-            $totalVeryHard += $levels->level_very_hard;
+            $totalVeryEasy += $level_very_easy;
+            $totalEasy += $level_easy;
+            $totalMiddling += $level_middling;
+            $totalHard += $level_hard;
+            $totalVeryHard += $level_very_hard;
 
             $total_person_received = floor(
-                ($levels->level_very_easy * $IncDt->rateveryeasy) +
-                ($levels->level_easy * $IncDt->rateeasy) +
-                ($levels->level_middling * $IncDt->ratemiddling) +
-                ($levels->level_hard * $IncDt->ratehard) +
-                ($levels->level_very_hard * $IncDt->rateveryhard)
+                ($level_very_easy * $IncDt->rateveryeasy) +
+                ($level_easy * $IncDt->rateeasy) +
+                ($level_middling * $IncDt->ratemiddling) +
+                ($level_hard * $IncDt->ratehard) +
+                ($level_very_hard * $IncDt->rateveryhard)
             );
 //            $total_person_received_teams += $total_person_received;
             $total_person_received_teams += $amount_qc_users[$index]['total_person_received'];
