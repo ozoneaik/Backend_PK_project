@@ -20,35 +20,6 @@ class IncHdAfterSaveController extends Controller
         }else{
             $QC_name = "( $QC_name->authcode ) $QC_name->name";
         }
-
-//        dd('hello world');
-        /*$IncDts = DB::table('inc_dts')
-            ->select(
-                'empqccode AS empqc',
-                DB::raw('MAX(grade) AS Grade'),
-                DB::raw('MAX(CASE WHEN le_name = \'Very Easy\' THEN rate ELSE NULL END) AS RateVeryEasy'),
-                DB::raw('MAX(CASE WHEN le_name = \'Easy\' THEN rate ELSE NULL END) AS RateEasy'),
-                DB::raw('MAX(CASE WHEN le_name = \'Middling\' THEN rate ELSE NULL END) AS RateMiddling'),
-                DB::raw('MAX(CASE WHEN le_name = \'Hard\' THEN rate ELSE NULL END) AS RateHard'),
-                DB::raw('MAX(CASE WHEN le_name = \'Very Hard\' THEN rate ELSE NULL END) AS RateVeryHard'),
-                'paystatus',
-                'payremark',
-                'payamnt',
-                'qcqty AS EmpqcCount',
-                'timepermonth AS HM',
-                'timeperday AS HD'
-            )
-            ->where('inc_id', $old_data_teams->id)
-            ->groupBy(
-                'empqccode',
-                'paystatus',
-                'payremark',
-                'payamnt',
-                'qcqty',
-                'timepermonth',
-                'timeperday'
-            )
-            ->get();*/
         $IncDts = DB::table('inc_dts')
             ->select(
                 'empqccode AS empqc',
@@ -105,6 +76,7 @@ class IncHdAfterSaveController extends Controller
                 )
                 ->where('empqccode', $IncDt->empqc)
                 ->first();
+            dd($levels);
             $empqc_name = DB::connection('mysql_main_qc')->table('qc_user')->select('emp_name')->where('emp_no', $IncDt->empqc)->first();
             $amount_qc_users[] = [
                 'HM' => $IncDt->HM,
