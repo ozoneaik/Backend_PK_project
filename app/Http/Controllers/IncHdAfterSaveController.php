@@ -6,6 +6,7 @@ use App\Models\inc_dt;
 use App\Models\inc_hd;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class IncHdAfterSaveController extends Controller
 {
@@ -21,7 +22,7 @@ class IncHdAfterSaveController extends Controller
         }
 
 //        dd('hello world');
-        $IncDts = DB::table('inc_dts')
+        /*$IncDts = DB::table('inc_dts')
             ->select(
                 'empqccode AS empqc',
                 DB::raw('MAX(grade) AS Grade'),
@@ -47,7 +48,36 @@ class IncHdAfterSaveController extends Controller
                 'timepermonth',
                 'timeperday'
             )
+            ->get();*/
+        $IncDts = DB::table('inc_dts')
+            ->select(
+                'empqccode AS empqc',
+                DB::raw('MAX(grade) AS Grade'),
+                DB::raw("MAX(CASE WHEN le_name = 'Very Easy' THEN rate ELSE NULL END) AS RateVeryEasy"),
+                DB::raw("MAX(CASE WHEN le_name = 'Easy' THEN rate ELSE NULL END) AS RateEasy"),
+                DB::raw("MAX(CASE WHEN le_name = 'Middling' THEN rate ELSE NULL END) AS RateMiddling"),
+                DB::raw("MAX(CASE WHEN le_name = 'Hard' THEN rate ELSE NULL END) AS RateHard"),
+                DB::raw("MAX(CASE WHEN le_name = 'Very Hard' THEN rate ELSE NULL END) AS RateVeryHard"),
+                'paystatus',
+                'payremark',
+                'payamnt',
+                'qcqty AS EmpqcCount',
+                'timepermonth AS HM',
+                'timeperday AS HD'
+            )
+            ->where('inc_id', $old_data_teams->id)
+            ->groupBy(
+                'empqccode',
+                'paystatus',
+                'payremark',
+                'payamnt',
+                'qcqty',
+                'timepermonth',
+                'timeperday'
+            )
             ->get();
+
+        Log::info($IncDts);
 
         $amount_qc_users = [];
         $totalVeryEasy = 0;
@@ -56,21 +86,12 @@ class IncHdAfterSaveController extends Controller
         $totalHard = 0;
         $totalVeryHard = 0;
         $total_person_received_teams = 0;
-        switch ($old_data_teams->gradeteam) {
-            case 'A':
-            case 'A+' :
-                $total_received_team = 200;
-                break;
-            case 'B' :
-                $total_received_team = 150;
-                break;
-            case 'C' :
-                $total_received_team = 100;
-                break;
-            default:
-                $total_received_team = 0;
-                break;
-        }
+        $total_received_team = match ($old_data_teams->gradeteam) {
+            'A', 'A+' => 200,
+            'B' => 150,
+            'C' => 100,
+            default => 0,
+        };
 
         foreach ($IncDts as $index=>$IncDt) {
             $levels = DB::table('inc_details')
