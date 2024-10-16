@@ -4,6 +4,7 @@ use App\Http\Controllers\AddYearController;
 use App\Http\Controllers\ApproveIncHdController;
 use App\Http\Controllers\AuthController;
 
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\GetQcYear;
 use App\Http\Controllers\IncHdController;
 use App\Http\Controllers\ManageUserController;
@@ -87,9 +88,9 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/signup', [AuthController::class, 'signup']);
 
-Route::get('test',function (){
-    return response()->json(['test from api.php']);
-});
+Route::get('test',[Controller::class, 'test']);
+
+
 
 
 
