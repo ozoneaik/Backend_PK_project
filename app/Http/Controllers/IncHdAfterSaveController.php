@@ -76,7 +76,7 @@ class IncHdAfterSaveController extends Controller
                 )
                 ->where('empqccode', $IncDt->empqc)
                 ->first();
-            dd($levels);
+            dd($levels,$IncDt->empqc);
             $empqc_name = DB::connection('mysql_main_qc')->table('qc_user')->select('emp_name')->where('emp_no', $IncDt->empqc)->first();
             $amount_qc_users[] = [
                 'HM' => $IncDt->HM,
