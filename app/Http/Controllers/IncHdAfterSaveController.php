@@ -87,38 +87,43 @@ class IncHdAfterSaveController extends Controller
                 ->get();
 //            dd($levels,$IncDt->empqc);
             $empqc_name = DB::connection('mysql_main_qc')->table('qc_user')->select('emp_name')->where('emp_no', $IncDt->empqc)->first();
-//            if ($IncDt->empqc == '90035'){
-//                dd($levels,$IncDt->empqc);
-//            }
             $level_very_easy = $level_easy = $level_middling = $level_hard = $level_very_hard = 0;
+            $T = 0;
             foreach ($levels as $level) {
                 switch ($level->le_name) {
                     case 'Very easy':
                         $level_very_easy = $level->total_skuqty;
+                        $T += $level_very_easy;
                         break;
                     case 'Easy':
                         $level_easy = $level->total_skuqty;
+                        $T += $level_easy;
                         break;
                     case 'Middling':
                         $level_middling = $level->total_skuqty;
+                        $T += $level_middling;
                         break;
                     case 'Hard':
                         $level_hard = $level->total_skuqty;
+                        $T += $level_hard;
                         break;
                     case 'Very Hard':
                         $level_very_hard = $level->total_skuqty;
+                        $T += $level_very_hard;
                         break;
                 }
             }
 
-
+//            dd($T,$IncDt->empqc);
+            //            dd($levels,$IncDt->empqc);
 
             $amount_qc_users[] = [
                 'HM' => $IncDt->HM,
                 'HD' => $IncDt->HD,
                 'emp_name' => $empqc_name->emp_name,
                 'empqc' => $IncDt->empqc,
-                'empqc_count' => $IncDt->EmpqcCount,
+//                'empqc_count' => $IncDt->EmpqcCount,
+                'empqc_count' => $T,
                 'grade' => $IncDt->grade,
                 'level_very_easy' => $level_very_easy ?? 0,
                 'level_easy' => $level_easy ?? 0,
