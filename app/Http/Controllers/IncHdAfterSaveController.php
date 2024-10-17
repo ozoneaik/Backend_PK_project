@@ -67,6 +67,7 @@ class IncHdAfterSaveController extends Controller
             default => 0,
         };
 
+        $TT = 0;
         foreach ($IncDts as $index=>$IncDt) {
 //            $levels = DB::table('inc_details')
 //                ->select(
@@ -89,6 +90,7 @@ class IncHdAfterSaveController extends Controller
             $empqc_name = DB::connection('mysql_main_qc')->table('qc_user')->select('emp_name')->where('emp_no', $IncDt->empqc)->first();
             $level_very_easy = $level_easy = $level_middling = $level_hard = $level_very_hard = 0;
             $T = 0;
+
             foreach ($levels as $level) {
                 switch ($level->le_name) {
                     case 'Very easy':
@@ -116,6 +118,7 @@ class IncHdAfterSaveController extends Controller
 
 //            dd($T,$IncDt->empqc);
             //            dd($levels,$IncDt->empqc);
+            $TT += $T;
 
             $amount_qc_users[] = [
                 'HM' => $IncDt->HM,
@@ -176,7 +179,8 @@ class IncHdAfterSaveController extends Controller
             'totalVeryHard' => strval($totalVeryHard),
 
             'totalPersonReceived' => $total_person_received_teams,
-            'total_empqc_teams' => $old_data_teams->totalqcqty,
+//            'total_empqc_teams' => $old_data_teams->totalqcqty,
+            'total_empqc_teams' => $TT,
             'total_received_team' => $total_received_team,
 
             'workday' => $old_data_teams->workday,
