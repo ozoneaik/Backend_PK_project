@@ -87,6 +87,10 @@ class IncHdAfterSaveController extends Controller
                 ->get();
 //            dd($levels,$IncDt->empqc);
             $empqc_name = DB::connection('mysql_main_qc')->table('qc_user')->select('emp_name')->where('emp_no', $IncDt->empqc)->first();
+//            if ($IncDt->empqc == '90035'){
+//                dd($levels,$IncDt->empqc);
+//            }
+            $level_very_easy = $level_easy = $level_middling = $level_hard = $level_very_hard = 0;
             foreach ($levels as $level) {
                 switch ($level->le_name) {
                     case 'Very easy':
@@ -106,6 +110,7 @@ class IncHdAfterSaveController extends Controller
                         break;
                 }
             }
+
 
 
             $amount_qc_users[] = [
