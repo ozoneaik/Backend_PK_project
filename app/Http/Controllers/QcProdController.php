@@ -7,6 +7,8 @@ use App\Models\ProductNotFound;
 use App\Models\qc_prod;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+
 
 class QcProdController extends Controller
 {
@@ -14,6 +16,21 @@ class QcProdController extends Controller
     public function index(): JsonResponse
     {
         $products = qc_prod::all();
+		foreach($products as $key=>$product){
+			if($product['levelid'] === 'L001'){
+				$product['levelname'] = 'Very Easy';
+			}elseif($product['levelid'] === 'L002'){
+				$product['levelname'] = 'Easy';
+			}elseif($product['levelid'] === 'L003'){
+				$product['levelname'] = 'Middling';
+			}elseif($product['levelid'] === 'L004'){
+				$product['levelname'] = 'Hard';
+			}elseif($product['levelid'] === 'L005'){
+				$product['levelname'] = 'Very Hard';
+			}else{
+				$product['levelname'] = 'No QC';
+			}
+		}
         if (count($products) > 0){
             return response()->json(['products' => $products,'msg' => 'ตรวจพบรายการสินค้าในฐานข้อมุล'], 200);
         }else{
