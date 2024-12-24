@@ -12,7 +12,7 @@ use App\Http\Controllers\QcProdController;
 use App\Http\Controllers\QcRateController;
 use App\Http\Controllers\QcTimeController;
 use App\Http\Controllers\QcWorkdayController;
-
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -83,7 +83,12 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/not-found/{year}/{month}', [QcProdController::class, 'notFound']);
     });
 
+    
+   
+
 });
+
+Route::get('/report', [ReportController::class, 'report']);
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/signup', [AuthController::class, 'signup']);
