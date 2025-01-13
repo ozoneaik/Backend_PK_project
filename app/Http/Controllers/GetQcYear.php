@@ -9,10 +9,9 @@ class GetQcYear extends Controller
 {
     //ดึงจำนวนงาน QC ในปีนั้นๆแต่ละเดือน
     public function getQcYear($year){
-        $currentMonth = date('n'); // เดือนปัจจุบัน (1-12)
-
-        $getIncHds = inc_hd::where('yearkey', $year)->orderBy('monthkey', 'asc')->get();
-
+        // $currentMonth = date('n'); // เดือนปัจจุบัน (1-12)
+        $currentMonth = 12;
+        $getIncHds = inc_hd::query()->where('yearkey', $year)->orderBy('monthkey', 'asc')->get();
         $allMonths = [];
         for ($month = 1; $month <= $currentMonth; $month++) {
             $monthData = $getIncHds->firstWhere('monthkey', $month);

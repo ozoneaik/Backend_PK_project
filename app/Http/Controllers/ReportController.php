@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -31,7 +32,21 @@ class ReportController extends Controller
             ->leftJoin('qc_user as qk', 'ld.empkey', '=', 'qk.emp_no')
             ->whereBetween(DB::raw('DATE(ld.datekey)'), [$startTime, $endTime])->get();
         return response()->json([
-            'list' => $list
+            'list' => $list,
+            'startTime' => $startTime,
+            'endTime' => $endTime
+        ]);
+    }
+
+    public function reportFromSystem (Request $request) : JsonResponse{
+        $request->validate(['datekey' => 'required',], ['datekey.required' => 'กรุณาเลือกเดือนที่ต้องการดูรายงาน']);
+        $startTime = $request->datekey . '-01';
+        $endTime = $request->datekey . '-31';
+
+        return response()->json([
+            'list' => [],
+            'startTime' => $startTime,
+            'endTime' => $endTime
         ]);
     }
 }
