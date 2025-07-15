@@ -338,7 +338,7 @@ class IncHdController extends Controller
         try {
             $updateIncHd = inc_hd::find($IncHdId);
 //            dd($updateIncHd);
-            $updateIncHd->status = auth()->user()->emp_role === 'QC' ? 'wait' : 'active';
+            $updateIncHd->status = auth()->user()->emp_role === 'QC' ? 'active' : 'wait';
             $updateIncHd->totalqcqty = $request->data_team['total_empqc_teams'];
             $updateIncHd->totaltimepermonth = $request->data_team['average_time_HM'];
             $updateIncHd->totaltimeperday = $request->data_team['average_time_HD'];

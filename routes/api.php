@@ -56,6 +56,9 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/qc_rate_update', [QcRateController::class, 'update']);
         });
 
+        // แก้ไขการเลือกจ่าย HR
+        Route::post('/qc_month/update_paystatus', [ApproveIncHdController::class, 'updatePayStatus']);
+
 
         //Insert Data to Database
         Route::post('/qc_month/store', [IncHdController::class, 'store']);
